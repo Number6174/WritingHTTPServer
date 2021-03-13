@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        #timer {
+            width: 200px;
+            height: 200px;
+            position: relative;
+        }
+
+        #timesvg {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+
+        #time {
+            font: bold 30px sans-serif;
+            fill: red; /* note have to use fill, not color here since inside a svg*/
+        }
+
+        #hours {
+            fill: blueviolet;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div id="timer">
+        <img style='height: 100%; width: 100%; object-fit: contain' src="clock.png" />
+        <svg id="timesvg" width="200" height="200">
+            <text id="time" x="100" y="100" transform="rotate(45,100,100)" dominant-baseline="central" text-anchor="middle">
+                <tspan id="hours">12</tspan>:<tspan id="minutes">59</tspan>:<tspan id="seconds">59</tspan>
+            </text>
+        </svg>
+    </div>
+
+    <script>
+        // Much of the time code is adapted/ripped from https://www.sitepoint.com/build-javascript-countdown-timer-no-dependencies/
+        function getTimeRemaining(endtime) {
+            const total = Date.parse(endtime) - Date.parse(new Date());
+            const seconds = Math.floor((total / 1000) % 60);
+            const minutes = Math.floor((total / 1000 / 60) % 60);
+            const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
+
+            return {
+                total,
+                hours,
+                minutes,
+                seconds
+            };
+        }
+        function updateClock() {
+            const t = getTimeRemaining(endtime);
+            if (t.total <= 0) {
+                clearInterval(clockInterval);
+                t.hours = 0;
+                t.minutes = 0;
+                t.seconds = 0;
+            }
+            hoursSpan.innerHTML = t.hours;
+            minutesSpan.innerHTML = ('0' + t.minutes).slice(-2);
+            secondsSpan.innerHTML = ('0' + t.seconds).slice(-2);
+        }
+
+        const endtime = "December 31 2021 23:53:00";
+        const clock = document.querySelector("#time");
+        const hoursSpan = clock.querySelector('#hours');
+        const minutesSpan = clock.querySelector('#minutes');
+        const secondsSpan = clock.querySelector('#seconds');
+
+        updateClock(); // run function once at first to avoid delay
+        var clockInterval = setInterval(updateClock, 1000);
+    </script>
+
+</body>
+
+</html>
