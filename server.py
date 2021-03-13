@@ -149,8 +149,8 @@ def ensureTimerSetup(config):
             timer_data['current-end'] = parse(timer_data['current-end'])
 
             now = datetime.datetime.now()
-            if timer_data['stream-start'] < now and now <  timer_data['current-end']:
-                print("Since current time is between start and end in timer_data.json, assuming script restarted during stream")
+            if now <  timer_data['current-end']:
+                print("Since current time is before end in timer_data.json, assuming script restarted during stream")
                 return
 
     # No existing timer data or expired
