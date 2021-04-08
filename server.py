@@ -40,14 +40,31 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_error(404)
             return
 
+        # Optional mode
+        mode = 'w'
+        if 'mode' in query:
+            if query['mode'][0] == 'a':
+                mode = 'a'
+            elif query['mode'][0] != 'w':
+                self.log_message("Unknown mode parameter '" + query['mode'][0] + "'")
+                self.send_error(404)
+
         filename = query['filename'][0]
         data = query['data'][0]
 
+        # Optional timestamp and per line
+        if 'log' in query:
+            from datetime import datetime
+            data = datetime.now().isoformat() + ' - ' + data + '\n'
+
         # Actually write to the file
-        with open(filename, 'w') as w:
+        with open(filename, mode) as w:
             w.write(data)
 
-        self.log_message("To the file named '" + filename + "', the contents '" + data + "' was written")
+        if mode == 'w':
+            self.log_message("'" + filename + "' was overwritten with '" + data + "'")
+        elif mode == 'a':
+            self.log_message("'" + filename + "' was appended with '" + data + "'")
 
     def handle_timer(self):
         # Extract query

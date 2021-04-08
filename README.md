@@ -68,3 +68,24 @@ For URLs of the form:
 It will open up the filename `filename.txt` and replace the contents with `contents`.
 Unless otherwise specified, the file `filename.txt` will be in the same directory as the script.
 Be careful of what file you specify, if it is important, it will be overwritten.
+
+There are optional query parameters of `mode`, and `log`. The `mode` parameter accepts either `w` to overwrite the file contents or `a` to append to the file. The `log` paramater ignores any values, but if present, will put the new data on a line by itself with a timestamp.
+
+For example, if you made the two successive requests of
+
+    http://127.0.0.1:8001/write?filename=filename.txt&mode=a&data=1
+    http://127.0.0.1:8001/write?filename=filename.txt&mode=a&data=2
+
+It would result in the file `filename.txt` containing:
+
+    12
+
+But if you had the two successive requests of
+
+    http://127.0.0.1:8001/write?filename=filename.txt&mode=a&log=true&data=1
+    http://127.0.0.1:8001/write?filename=filename.txt&mode=a&log=true&data=2
+
+It would result in the file `filename.txt` containing something like:
+
+    2021-04-08T09:37:20.769127 - 1
+    2021-04-08T09:37:21.799855 - 2
