@@ -70,7 +70,7 @@
         function updateFromFile() {
             jQuery.get('timer_data.json', function (data) {
                 endtime = data['current-end'];
-            });
+            }, "json");
         }
 
         function update() {
