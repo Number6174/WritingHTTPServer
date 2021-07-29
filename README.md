@@ -2,16 +2,20 @@
 A simple Python HTTP server that writes GET parameters to a specified file.
 It also supports a timer that can be extended by specific events.
 
-WARNING: This is a very purpose driven program. If you don't completely understand how to use it, it could expose you to security vulnerabilities. Do not open this program to the broader internet. Only allow it to accept local connections.
+WARNING: This is a very purpose driven program. If you don't completely understand how to use it, it could
+expose you to security vulnerabilities. Do not open this program to the broader internet. Only allow it to
+accept local connections. It uses Python's [http.server](https://docs.python.org/3/library/http.server.html)
+which is not hardened.
 
 The provided configuration has it listen only on 127.0.0.1. It is not recommended that you change this.
 
 # Setup
 
-1. Install Python for [Windows](https://www.python.org/downloads/windows/) (tested with 3.9.2)
+1. Install Python for [Windows](https://www.python.org/downloads/windows/) (tested with 3.9.3)
 2. Verify Python is in your PATH. This can be done by running
-`python --version` in the Windows Terminal. You should see a response like `Python 3.9.2`
-3. Install dateutil. This is easiest to do by typing `pip install python-dateutil` at the command line.
+`python --version` in the Windows Terminal. You should see a response like `Python 3.9.3`
+3. Ensure the following Python packages are installed. You may wish to do this in a [venv](https://docs.python.org/3/tutorial/venv.html). Each can be installed as `pip install`
+    * python-dateutil
 
 # Configuration
 
@@ -45,19 +49,42 @@ It will start a webserver on port 8001. The port is configurable only by editing
 
 To stop the program, hit CTRL+C.
 
-## /timer
+## /api
+This provides REST style information. These are here to simplify using some of the information managed by this script.
+It permits an HTML file to not care where a file is present on a hard drive and need only know the URL to obtain the
+data.
 
-This modifies the file `timer_data.json` which is intended to be paired with timer.html
+### /api/timer
+Returns the contents of `timer_data.json`. 
 
-For URLs of the form:
+### /api/config
+Returns the contents of `config.json`.
 
-    http://127.0.0.1:8001/timer?bits=amount
-    http://127.0.0.1:8001/timer?sub=amount&tier=tier
-    http://127.0.0.1:8001/timer?tip=amount
+## /event
 
-It will increase the end time by an appropriate amount according to the config values.
-In the case of a gift sub or resub, use the amount of 1. The amount is primarily there for community gift subs.
-The acceptable values for tier are "Prime", "Tier 1", "Tier 2", or "Tier 3"
+This endpoint records various events. It is recommended you call this endpoint for each bit, sub, and tip.
+
+Each event should have both a name and event type. The name is specified by either `name` or `twitch_id`.
+The event type can be one of `bits`, `sub`, or `tip`.
+
+    http://127.0.0.1:8001/event?name=Username&bits=amount
+    http://127.0.0.1:8001/event?name=Username&sub=amount&tier=tier
+    http://127.0.0.1:8001/event?name=Username&tip=amount
+
+Amount must be an integer, typically the value of `1` except for community gift subs. Tier must be one of "Prime", "Tier 1", "Tier 2", or "Tier 3".
+
+If you wish to use Hype Train information, use the following
+
+    http://127.0.0.1:8001/event?train=start
+    http://127.0.0.1:8001/event?train=end&sub_conductor=id&bit_conductor=id
+    http://127.0.0.1:8001/event?train=progress&level=level&progress=amount&total=amount
+    http://127.0.0.1:8001/event?train=conductor&bit_conductor=id&bit_conductor=id
+    http://127.0.0.1:8001/event?train=cooldownover
+
+If you are using Kruiz Control, this should correspond to the data you obtain from the events `OnHypeTrainStart`,
+`OnHypeTrainEnd`, `OnHypeTrainProgress`, `OnHypeTrainConductor`, and `OnHypeTrainCooldownExpired`, respectively
+
+This endpoint will appropriately adjust the timer
 
 ## /write
 

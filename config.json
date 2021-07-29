@@ -1,15 +1,18 @@
 {
     "host": "127.0.0.1",
     "port": 8001,
+    "event": {
+        "per100bits": 100,
+        "perdollartip": 100,
+        "prime-sub": 250,
+        "t1-sub": 250,
+        "t2-sub": 500,
+        "t3-sub": 1250
+    },
     "timer": {
         "stream-start": "5pm",
-        "stream-end": "5am",
         "timer-start": "3h",
-        "prime-sub": "30s",
-        "t1-sub": "30s",
-        "t2-sub": "1m",
-        "t3-sub": "2m30s",
-        "per100bits": "6s",
-        "perdollartip": "6s"
+        "time-fundable": "9h",
+        "points-to-fully-fund": 10000
     }
 }

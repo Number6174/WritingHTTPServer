@@ -1,0 +1,185 @@
+<!doctype html>
+<html>
+  <head>
+    <title>WritingHTTPServer Control Panel</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+   </head>
+  <body>
+    <h1>Timer Info</h1>
+
+    <h3>Current time:</h3> 
+    <div id="time">
+        <span id="hours">12</span>:<span id="minutes">59</span>:<span id="seconds">59</span>
+    </div>
+    <div>
+        Funded: <span id="funded"></span> / <span id="to_fully_fund"></span> or <span id="funded_percent"></span> %
+    </div>
+
+    <script>
+        // Much of the time code is adapted/ripped from https://www.sitepoint.com/build-javascript-countdown-timer-no-dependencies/
+        function getTimeRemaining(endtime) {
+            const total = Date.parse(endtime) - Date.parse(new Date());
+            const seconds = Math.floor((total / 1000) % 60);
+            const minutes = Math.floor((total / 1000 / 60) % 60);
+            const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
+
+            return {
+                total,
+                hours,
+                minutes,
+                seconds
+            };
+        }
+        function updateClock() {
+            const t = getTimeRemaining(endtime);
+            if (t.total <= 0) {
+                t.hours = 0;
+                t.minutes = 0;
+                t.seconds = 0;
+            }
+            hoursSpan.innerHTML = t.hours;
+            minutesSpan.innerHTML = ('0' + t.minutes).slice(-2);
+            secondsSpan.innerHTML = ('0' + t.seconds).slice(-2);
+        }
+        function updateFromServer() {
+            jQuery.get('/api/timer', function (data) {
+                endtime = data['current-end'];
+                points_funded = data['points-funded'];
+                points_to_fully_fund = data['points-to-fully-fund'];
+            }, "json");
+        }
+
+        function updatePoints() {
+            fundedSpan.innerHTML = points_funded;
+            toFundSpan.innerHTML = points_to_fully_fund;
+            fundedPercentSpan.innerHTML = points_funded / points_to_fully_fund * 100;
+        }
+
+        function update() {
+            updateFromServer();
+            updateClock();
+            updatePoints();
+        }
+
+        let endtime = "2021-03-13T17:00:00";
+        let points_funded = 0;
+        let points_to_fully_fund = 100;
+        const clock = document.querySelector("#time");
+        const hoursSpan = clock.querySelector('#hours');
+        const minutesSpan = clock.querySelector('#minutes');
+        const secondsSpan = clock.querySelector('#seconds');
+        const fundedSpan = document.querySelector("#funded");
+        const toFundSpan = document.querySelector("#to_fully_fund");
+        const fundedPercentSpan = document.querySelector("#funded_percent");
+
+        update(); // run function once at first to avoid delay
+        setInterval(update, 1000); // 1k = 1s
+    </script>
+
+    <h3>Modify the timer</h3>
+    Add:
+    <br />
+    <input type="button" id="timer_add_prime" value="Prime" />
+    <input type="button" id="timer_add_t1" value="T1" />
+    <input type="button" id="timer_add_t2" value="T2" />
+    <input type="button" id="timer_add_t3" value="T3" />
+
+    <br />
+    <input type="number" id="timer_bits_qty" /> <input type="button", id="timer_add_bits" value="Bits" />
+    <br />
+    <input type="number" id="timer_tip_qty" /> <input type="button", id="timer_add_tip" value="Tip" />
+
+    <script>
+        document.getElementById("timer_add_prime").onclick=async () =>{
+            jQuery.ajax('/event?name=Fake&sub=1&tier=Prime')
+            update()
+        };
+        document.getElementById("timer_add_t1").onclick=async () =>{
+            jQuery.ajax('/event?name=Fake&sub=1&tier=Tier%201')
+            update()
+        };
+        document.getElementById("timer_add_t2").onclick=async () =>{
+            jQuery.ajax('/event?name=Fake&sub=1&tier=Tier%202')
+            update()
+        };
+        document.getElementById("timer_add_t3").onclick=async () =>{
+            jQuery.ajax('/event?name=Fake&sub=1&tier=Tier%203')
+            update()
+        };
+
+        document.getElementById("timer_add_bits").onclick=async () =>{
+            jQuery.ajax('/event?name=Fake&bits=' + document.getElementById("timer_bits_qty").value  )
+            update()
+        };
+        document.getElementById("timer_add_tip").onclick=async () =>{
+            jQuery.ajax('/event?name=Fake&tip=' + document.getElementById("timer_tip_qty").value  )
+            update()
+        };
+    </script>
+
+    <h3>Timer Configuration</h3>
+
+    <input type="button" id="config_read" value="Read" />
+    <input type="button" id="config_write" value="Write" />
+    <br />
+
+    Stream normally starts at: <input type="datetime-local" id="timer_start_datetime" />
+    <br />
+    Stream could extend until: <input type="datetime-local" id="timer_stream_end_datetime" />
+    <br />
+    Current End: <input type="datetime-local" id="timer_stream_current_end_datetime" />
+
+    <br />
+    Stream normally starts at <input type="text" id="config_timer_start" />
+    <br />
+    Initial amount to put on timer <input type="text" id="config_timer_initial" />
+    <br />
+    Can fund up to <input type="text" id="config_timer_max_fund_time" /> using <input type="number" id="config_timer_max_points" /> points.
+    <br />
+    Every 100 bits contributes <input type="number" id="config_timer_bits" /> points
+    <br />
+    Every dollar tip contributes <input type="number" id="config_timer_tips" /> points
+    <br />
+    Every Prime sub contributes <input type="number" id="config_timer_prime_sub" /> points
+    <br />
+    Every T1 sub contributes <input type="number" id="config_timer_t1_sub" /> points
+    <br />
+    Every T2 sub contributes <input type="number" id="config_timer_t2_sub" /> points
+    <br />
+    Every T3 sub contributes <input type="number" id="config_timer_t3_sub" /> points
+
+    <script>
+        document.getElementById("config_read").onclick=async () =>{
+            let A = jQuery.get('/api/config')
+            let B = jQuery.get('/api/timer')
+            
+            $.when(A, B).done(function(){
+                config = A.responseJSON
+                data = B.responseJSON
+                console.log(config)
+                console.log(data)
+                document.getElementById("timer_start_datetime").value = data['stream-start']
+                document.getElementById("timer_stream_end_datetime").value = data['stream-end']
+                document.getElementById("timer_stream_current_end_datetime").value = data['current-end']
+
+                document.getElementById("config_timer_start").value = config['timer']['stream-start']
+                document.getElementById("config_timer_initial").value = config['timer']['timer-start']
+                document.getElementById("config_timer_max_fund_time").value = config['timer']['time-fundable']
+                document.getElementById("config_timer_max_points").value = config['timer']['points-to-fully-fund']
+
+                document.getElementById("config_timer_bits").value = config['event']['per100bits']
+                document.getElementById("config_timer_tips").value = config['event']['perdollartip']
+                document.getElementById("config_timer_prime_sub").value = config['event']['prime-sub']
+                document.getElementById("config_timer_t1_sub").value = config['event']['t1-sub']
+                document.getElementById("config_timer_t2_sub").value = config['event']['t2-sub']
+                document.getElementById("config_timer_t3_sub").value = config['event']['t3-sub']
+            })
+
+        };
+    </script>
+
+    <h1>Keypress</h1>
+    
+
+  </body>
+</html>
