@@ -21,24 +21,28 @@ The provided configuration has it listen only on 127.0.0.1. It is not recommende
 
 Edit the included `config.json`. The program must be restarted to load any configuration changes
 
-* "host" - This defines the host to listen to. It is strongly recommended to only be 127.0.0.1
-* "port" - The port to listen on. The default configuration uses 8001.
+* `host` - This defines the host to listen to. It is strongly recommended to only be 127.0.0.1
+* `port` - The port to listen on. The default configuration uses 8001.
 
 All the dates and times go through [dateutils's parser](https://dateutil.readthedocs.io/en/stable/parser.html)
 which is very generous on formatting. Valid formats include: "5pm", "17:00", "2021-03-14-05", "March 14 at 5pm",
 "3 hours", "3h", "1 minute", "1m", "30 seconds", "30s", "1m30s", among others.
 
-Under timer, you'll find:
+Under `event`, you'll find:
 
-* "stream-start" - When your stream normally starts, e.g. "5pm"
-* "stream-end" - The maximum time your stream can end, e.g. "5am"
-* "timer-start" - How much to start the timer with prior to any bits/subs/tips, e.g. "3h"
-* "prime-sub" - How much time should be added for a Twitch Prime Sub, e.g. "30s"
-* "t1-sub" - How much time should be added for a Tier 1 Twitch Sub, e.g. "30s"
-* "t2-sub" - How much time should be added for a Tier 2 Twitch Sub, e.g. "1m"
-* "t3-sub" - How much time should be added for a Tier 2 Twitch Sub, e.g. "2m30s"
-* "per100bits" - How much time should be added for every 100 bits on Twitch, e.g. "6s"
-* "perdollartip" - How much time should be added for dollar of a tip, e.g."6s"
+* `per100bits` - How many points per 100 bits cheered, e.g. `100`
+* `perdollartip` - How many points per 1 dollar in tips, e.g. `100`
+* `prime-sub` - How many points per Prime sub, e.g. `250`
+* `t1-sub` - How many points per Tier 1 sub, e.g. `250`
+* `t2-sub` - How many points per Tier 2 sub, e.g. `500`
+* `t3-sub` - How many points per Tier 3 sub, e.g. `1250`
+
+Under `timer`, you'll find:
+
+* `stream-start` - When your stream normally starts, e.g. `5pm`
+* `timer-start` - How much to start the timer with prior to any bits/subs/tips, e.g. `3h`
+* `time-fundable` - How long the timer can be extended, e.g. `9h`
+* `points-to-fully-fund` - How many points from events need to occur to fully fund
 
 # Use
 
