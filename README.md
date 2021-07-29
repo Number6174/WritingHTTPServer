@@ -20,6 +20,13 @@ The provided configuration has it listen only on 127.0.0.1. It is not recommende
 
 # Configuration
 
+## Web interface
+
+When the script is running, on say port 8001, accessing [http://127.0.0.1:8001](http://127.0.0.1:8001) will provide
+a web interface to many of the options of the script.
+
+## `config.json`
+
 Edit the included `config.json`. The program must be restarted to load any configuration changes
 
 * `host` - This defines the host to listen to. It is strongly recommended to only be 127.0.0.1
