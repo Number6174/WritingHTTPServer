@@ -4,6 +4,8 @@
     "event": {
         "per100bits": 100,
         "perdollartip": 100,
+        "tip-fee-percent": 2.90,
+        "tip-fee-fixed": 0.30,
         "prime-sub": 250,
         "t1-sub": 250,
         "t2-sub": 500,

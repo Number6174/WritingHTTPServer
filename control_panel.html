@@ -85,9 +85,15 @@
     <input type="button" id="timer_add_t3" value="T3" />
 
     <br />
-    <input type="number" id="timer_bits_qty" /> <input type="button", id="timer_add_bits" value="Bits" />
+    <input type="number" id="timer_bits_qty" /> <input type="button" id="timer_add_bits" value="Bits" />
     <br />
-    <input type="number" id="timer_tip_qty" /> <input type="button", id="timer_add_tip" value="Tip" />
+    <input type="number" id="timer_tip_qty" /> <input type="button" id="timer_add_tip" value="Tip" />
+    <br />
+    <br />
+
+    Modify: use text like "1h" or "5m" or "1h5m"
+    <br />
+    <input type="text" id="timer_modify_text" /> <input type="button" id="timer_increase_time" value="Increase" /> <input type="button" id="timer_decrease_time" value="Decrease" />
 
     <script>
         document.getElementById("timer_add_prime").onclick=async () =>{
@@ -115,6 +121,10 @@
             jQuery.ajax('/event?name=Fake&tip=' + document.getElementById("timer_tip_qty").value  )
             update()
         };
+
+        document.getElementById("timer_increase_time").onclick=async () =>{
+
+        };
     </script>
 
     <h3>Timer Configuration</h3>
@@ -123,13 +133,14 @@
     <input type="button" id="config_write" value="Write" />
     <br />
 
+    <h5>Current Stream</h5>
     Stream normally starts at: <input type="datetime-local" id="timer_start_datetime" />
     <br />
     Stream could extend until: <input type="datetime-local" id="timer_stream_end_datetime" />
     <br />
     Current End: <input type="datetime-local" id="timer_stream_current_end_datetime" />
 
-    <br />
+    <h5>Every Stream</h5>
     Stream normally starts at <input type="text" id="config_timer_start" />
     <br />
     Initial amount to put on timer <input type="text" id="config_timer_initial" />
@@ -138,7 +149,7 @@
     <br />
     Every 100 bits contributes <input type="number" id="config_timer_bits" /> points
     <br />
-    Every dollar tip contributes <input type="number" id="config_timer_tips" /> points
+    Every dollar tip contributes <input type="number" id="config_timer_tips" /> points, with a fee of <input type="number" id="config_timer_tip_fee_percent" /> % + <input type="number" id="config_timer_fee_fixed" /> 
     <br />
     Every Prime sub contributes <input type="number" id="config_timer_prime_sub" /> points
     <br />
@@ -149,7 +160,7 @@
     Every T3 sub contributes <input type="number" id="config_timer_t3_sub" /> points
 
     <script>
-        document.getElementById("config_read").onclick=async () =>{
+        function read_timer_config() {
             let A = jQuery.get('/api/config')
             let B = jQuery.get('/api/timer')
             
@@ -169,13 +180,21 @@
 
                 document.getElementById("config_timer_bits").value = config['event']['per100bits']
                 document.getElementById("config_timer_tips").value = config['event']['perdollartip']
+                document.getElementById("config_timer_tip_fee_percent").value = config['event']['tip-fee-percent']
+                document.getElementById("config_timer_fee_fixed").value = config['event']['tip-fee-fixed']
                 document.getElementById("config_timer_prime_sub").value = config['event']['prime-sub']
                 document.getElementById("config_timer_t1_sub").value = config['event']['t1-sub']
                 document.getElementById("config_timer_t2_sub").value = config['event']['t2-sub']
                 document.getElementById("config_timer_t3_sub").value = config['event']['t3-sub']
             })
+        }
 
+        document.getElementById("config_read").onclick=async () =>{
+            read_timer_config();
         };
+
+        // Onload
+        read_timer_config();
     </script>
 
     <h1>Keypress</h1>

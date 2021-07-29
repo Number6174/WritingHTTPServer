@@ -74,8 +74,8 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             points = 0
             if 'bits' in query:
                 amount = query['bits'][0]
-                points = config['event']['per100bits'] * int(amount) / 100
-                self.log_message('User: \'' + name + '\' cheered ' + amount + ' bits which is ' + str(points) + ' points')
+                points = int(config['event']['per100bits'] * int(amount) / 100)
+                self.log_message('User: \'' + name + '\' cheered ' + amount + ' bits (' + str(points) + ' points)')
             elif 'sub' in query:
                 amount = int(query['sub'][0])
                 if not 'tier' in query:
@@ -97,6 +97,12 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                     self.log_message('Have a sub with a invalid tier')
                     self.send_error(400)
                     return
+                self.log_message('User: \'' + name + '\' ' + str(amount) + ' ' + tier + ' subs (' + str(points) + ' points)')
+            elif 'tip' in query:
+                amount = float(query['tip'][0])
+                amount_after_fees = amount * (1.0 - config['event']['tip-fee-percent'] / 100) - config['event']['tip-fee-fixed']
+                points = int(config['event']['perdollartip'] * amount_after_fees)
+                self.log_message('User: \'' + name + '\' tipped ' + str(amount) + ' (' + str(points) + ' points)')
 
 
             # Read in timer info
