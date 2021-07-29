@@ -5,7 +5,8 @@ It also supports a timer that can be extended by specific events.
 WARNING: This is a very purpose driven program. If you don't completely understand how to use it, it could
 expose you to security vulnerabilities. Do not open this program to the broader internet. Only allow it to
 accept local connections. It uses Python's [http.server](https://docs.python.org/3/library/http.server.html)
-which is not hardened.
+which is not hardened. In addition, the CORS header `Access-Control-Allow-Origin` is set to `*` for some end
+points which bypasses the security that CORS can help provide.
 
 The provided configuration has it listen only on 127.0.0.1. It is not recommended that you change this.
 

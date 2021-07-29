@@ -67,14 +67,14 @@
             minutesSpan.innerHTML = ('0' + t.minutes).slice(-2);
             secondsSpan.innerHTML = ('0' + t.seconds).slice(-2);
         }
-        function updateFromFile() {
-            jQuery.get('timer_data.json', function (data) {
+        function updateFromServer() {
+            jQuery.get('http://127.0.0.1:8001/api/timer', function (data) {
                 endtime = data['current-end'];
             }, "json");
         }
 
         function update() {
-            updateFromFile();
+            updateFromServer();
             updateClock();
         }
 

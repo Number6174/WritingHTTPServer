@@ -40,6 +40,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 data = json.load(f)
                 self.send_response(200)
                 self.send_header("Content-type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 self.wfile.write(bytes(json.dumps(data, indent=4), "utf8"))
             return
