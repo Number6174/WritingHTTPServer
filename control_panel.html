@@ -112,12 +112,17 @@
     <input type="number" id="timer_bits_qty" /> <input type="button" id="timer_add_bits" value="Bits" />
     <br />
     <input type="number" id="timer_tip_qty" /> <input type="button" id="timer_add_tip" value="Tip" />
+    
     <br />
     <br />
 
-    Modify: use text like "1h" or "5m" or "1h5m"
+    Change: 
     <br />
-    <input type="text" id="timer_modify_text" /> <input type="button" id="timer_increase_time" value="Increase" /> <input type="button" id="timer_decrease_time" value="Decrease" />
+    Time: <input type="text" id="timer_modify_text" /><input type="button" id="timer_increase_time" value="Increase" /> <input type="button" id="timer_decrease_time" value="Decrease" /> use text like "1h" or "5m" or "1h5m"
+    <br />
+    Points: <input type="number" id="timer_points_qty" /><input type="button" id="timer_points_set" value="Set" /><input type="button" id="timer_points_increase" value="Increase" /><input type="button" id="timer_points_decrease" value="Decrease" />
+    <br />
+    
 
     <script>
         document.getElementById("timer_add_prime").onclick=async () =>{
@@ -147,8 +152,14 @@
         };
 
         document.getElementById("timer_increase_time").onclick=async () =>{
-
+            jQuery.ajax('/event?time=increase&amount=' + document.getElementById("timer_modify_text").value  )
+            update()
         };
+        document.getElementById("timer_decrease_time").onclick=async () =>{
+            jQuery.ajax('/event?time=decrease&amount=' + document.getElementById("timer_modify_text").value  )
+            update()
+        };
+
     </script>
 
     <h3>Timer Configuration</h3>

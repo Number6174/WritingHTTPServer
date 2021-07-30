@@ -94,9 +94,19 @@ If you wish to use Hype Train information, use the following
     http://127.0.0.1:8001/event?train=cooldownover
 
 If you are using Kruiz Control, this should correspond to the data you obtain from the events `OnHypeTrainStart`,
-`OnHypeTrainEnd`, `OnHypeTrainProgress`, `OnHypeTrainConductor`, and `OnHypeTrainCooldownExpired`, respectively
+`OnHypeTrainEnd`, `OnHypeTrainProgress`, `OnHypeTrainConductor`, and `OnHypeTrainCooldownExpired`, respectively.
 
-This endpoint will appropriately adjust the timer
+To arbitrarily shift the timer or points
+
+    http://127.0.01:8001/event?time=increase&amount=howmuch
+    http://127.0.01:8001/event?time=decrease&amount=howmuch
+    http://127.0.01:8001/event?points=increase&amount=howmuch
+    http://127.0.01:8001/event?points=decrease&amount=howmuch
+    http://127.0.01:8001/event?points=set&amount=howmuch
+
+Where `howmuch` is either a string to go through dateutil's parser for the time amounts, or an integer for the points.
+
+Each version of this endpoint will appropriately adjust the timer.
 
 ## /write
 

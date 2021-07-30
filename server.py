@@ -71,6 +71,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             if 'name' in query:
                 name = query['name'][0]
             
+            adjust = 0
             points = 0
             if 'bits' in query:
                 amount = query['bits'][0]
@@ -103,6 +104,33 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 amount_after_fees = amount * (1.0 - config['event']['tip-fee-percent'] / 100) - config['event']['tip-fee-fixed']
                 points = int(config['event']['perdollartip'] * amount_after_fees)
                 self.log_message('User: \'' + name + '\' tipped ' + str(amount) + ' (' + str(points) + ' points)')
+            elif 'time' in query:
+                direction = 0
+                if query['time'][0] == 'increase':
+                    direction = 1
+                elif query['time'][0] == 'decrease':
+                    direction = -1
+                else:
+                    #Invalid
+                    self.log_message('Event time with invalid value')
+                    self.send_response(400)
+                    return
+                if 'amount' not in query:
+                    self.log_message('No amount specified')
+                    self.send_response(400)
+                    return
+
+                today_no_time = datetime.datetime.combine(datetime.date.today(), datetime.time())
+                amount = (parse(query['amount'][0]) - today_no_time).total_seconds()
+
+                adjust = direction * amount
+
+            elif 'points' in query:
+                if 'amount' not in query:
+                    self.log_message('Points even with no amount')
+                    self.send_response(400)
+                    return
+
 
 
             # Read in timer info
@@ -112,18 +140,21 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
             # Add to total
             timer_data['points-funded'] += points
+            timer_data['time-adjust'] += adjust
 
             # Calculate stream end
             stream_start = datetime.datetime.fromisoformat(timer_data['stream-start'])
             stream_end = datetime.datetime.fromisoformat(timer_data['stream-end'])
-            current_end = stream_start + (timer_data['points-funded'] / timer_data['points-to-fully-fund']) * config['timer']['time-fundable']
+            percent_funded = timer_data['points-funded'] / timer_data['points-to-fully-fund']
+            time_adjust = datetime.timedelta(seconds=timer_data['time-adjust'])
+            current_end = stream_start + percent_funded * config['timer']['time-fundable'] + time_adjust
 
             # Do not exceed stream end
             if current_end > stream_end:
                 current_end = stream_end
 
             # Convert back to ISO Format and write out
-            timer_data['current-end'] = current_end.isoformat()
+            timer_data['current-end'] = current_end.isoformat(timespec='milliseconds')
 
             with open('timer_data.json', 'w') as f:
                 json.dump(timer_data, f, indent=4)
@@ -160,8 +191,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         # Optional timestamp and per line
         if 'log' in query:
-            from datetime import datetime
-            data = datetime.now().isoformat() + ' - ' + data + '\n'
+            data = datetime.datetime.now().isoformat() + ' - ' + data + '\n'
 
         # Actually write to the file
         with open(filename, mode) as w:
@@ -213,6 +243,7 @@ def ensureTimerSetup(config):
     timer_data['current-end'] = (config['timer']['stream-start'] + config['timer']['timer-start']).isoformat()
     timer_data['points-funded'] = 0
     timer_data['points-to-fully-fund'] = config['timer']['points-to-fully-fund']
+    timer_data['time-adjust'] = 0
 
     with open('timer_data.json', 'w') as f:
         json.dump(timer_data, f, indent=4)
