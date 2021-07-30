@@ -127,68 +127,76 @@
     <script>
         document.getElementById("timer_add_prime").onclick=async () =>{
             jQuery.ajax('/event?name=Fake&sub=1&tier=Prime')
-            update()
+            updateAll()
         };
         document.getElementById("timer_add_t1").onclick=async () =>{
             jQuery.ajax('/event?name=Fake&sub=1&tier=Tier%201')
-            update()
+            updateAll()
         };
         document.getElementById("timer_add_t2").onclick=async () =>{
             jQuery.ajax('/event?name=Fake&sub=1&tier=Tier%202')
-            update()
+            updateAll()
         };
         document.getElementById("timer_add_t3").onclick=async () =>{
             jQuery.ajax('/event?name=Fake&sub=1&tier=Tier%203')
-            update()
+            updateAll()
         };
 
         document.getElementById("timer_add_bits").onclick=async () =>{
             jQuery.ajax('/event?name=Fake&bits=' + document.getElementById("timer_bits_qty").value  )
-            update()
+            updateAll()
         };
         document.getElementById("timer_add_tip").onclick=async () =>{
             jQuery.ajax('/event?name=Fake&tip=' + document.getElementById("timer_tip_qty").value  )
-            update()
+            updateAll()
         };
 
         document.getElementById("timer_increase_time").onclick=async () =>{
             jQuery.ajax('/event?time=increase&amount=' + document.getElementById("timer_modify_text").value  )
-            update()
+            updateAll()
         };
         document.getElementById("timer_decrease_time").onclick=async () =>{
             jQuery.ajax('/event?time=decrease&amount=' + document.getElementById("timer_modify_text").value  )
-            update()
+            updateAll()
         };
 
         document.getElementById("timer_points_set").onclick=async () =>{
             jQuery.ajax('/event?points=set&amount=' + document.getElementById("timer_points_qty").value  )
-            update()
+            updateAll()
         };
         document.getElementById("timer_points_increase").onclick=async () =>{
             jQuery.ajax('/event?points=increase&amount=' + document.getElementById("timer_points_qty").value  )
-            update()
+            updateAll()
         };
         document.getElementById("timer_points_decrease").onclick=async () =>{
             jQuery.ajax('/event?points=decrease&amount=' + document.getElementById("timer_points_qty").value  )
-            update()
+            updateAll()
         };
 
     </script>
 
     <h3>Timer Configuration</h3>
 
-    <input type="button" id="config_read" value="Read" />
-    <input type="button" id="config_write" value="Write" />
-    <br />
+    These values will auto-update if you only modify them from this control panel. If they are altered outside this (including by events triggered from another program), you will want to force read before editing
 
     <h5>Current Stream</h5>
+    <input type="button" id="config_current_read" value="Force Read" />
+    <input type="button" id="config_current_write" value="Write" />
+    <br />
     Stream normally starts at: <input type="datetime-local" id="timer_start_datetime" />
     <br />
     Stream could extend until: <input type="datetime-local" id="timer_stream_end_datetime" />
     <br />
     Current End: <input type="datetime-local" id="timer_stream_current_end_datetime" />
+    <br />
+    Points funded <input type="number" id="timer_points_funded" /> out of <input type="number" id="timer_points_to_fully_fund" />
+    <br />
+    Time adjustment <input type="number" id="timer_time_adjust" /> seconds (can be negative value)
 
     <h5>Every Stream</h5>
+    <input type="button" id="config_every_read" value="Force Read" />
+    <input type="button" id="config_every_write" value="Write" />
+    <br />
     Stream normally starts at <input type="text" id="config_timer_start" />
     <br />
     Initial amount to put on timer <input type="text" id="config_timer_initial" />
@@ -208,17 +216,26 @@
     Every T3 sub contributes <input type="number" id="config_timer_t3_sub" /> points
 
     <script>
-        function read_timer_config() {
-            let A = jQuery.get('/api/config')
-            let B = jQuery.get('/api/timer')
+        function read_timer_current_config() {
+            let resp = jQuery.get('/api/timer')
             
-            $.when(A, B).done(function(){
-                config = A.responseJSON
-                data = B.responseJSON
+            $.when(resp).done(function(){
+                data = resp.responseJSON
 
                 document.getElementById("timer_start_datetime").value = data['stream-start']
                 document.getElementById("timer_stream_end_datetime").value = data['stream-end']
                 document.getElementById("timer_stream_current_end_datetime").value = data['current-end']
+                document.getElementById("timer_points_funded").value = data['points-funded']
+                document.getElementById("timer_points_to_fully_fund").value = data['points-to-fully-fund']
+                document.getElementById("timer_time_adjust").value = data['time-adjust']
+            })
+        }
+
+        function read_timer_every_config() {
+            let resp = jQuery.get('/api/config')
+            
+            $.when(resp).done(function(){
+                config = resp.responseJSON
 
                 document.getElementById("config_timer_start").value = config['timer']['stream-start']
                 document.getElementById("config_timer_initial").value = config['timer']['timer-start']
@@ -236,12 +253,22 @@
             })
         }
 
-        document.getElementById("config_read").onclick=async () =>{
-            read_timer_config();
+        document.getElementById("config_current_read").onclick=async () =>{
+            read_timer_current_config();
+        };
+        document.getElementById("config_every_read").onclick=async () =>{
+            read_timer_every_config();
         };
 
+
+        function updateAll() {
+            update() // Timer
+            read_timer_current_config()
+            read_timer_every_config()
+        }
+
         // Onload
-        read_timer_config();
+        updateAll()
     </script>
 
     <h1>Keypress</h1>
