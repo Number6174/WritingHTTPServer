@@ -3,8 +3,24 @@
   <head>
     <title>WritingHTTPServer Control Panel</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <style>
+        div.alert {
+            padding: 20px;
+            background-color: #f00;
+            color: white;
+            margin-bottom: 15px;
+            display: none;
+        }
+    </style>
+
    </head>
   <body>
+
+    <div class="alert" id="alert">
+        Error: Unable to connect to server
+    </div>
+
     <h1>Timer Info</h1>
 
     <h3>Current time:</h3> 
@@ -42,11 +58,19 @@
             secondsSpan.innerHTML = ('0' + t.seconds).slice(-2);
         }
         function updateFromServer() {
-            jQuery.get('/api/timer', function (data) {
+            jQuery.ajax({
+                url: '/api/timer',
+                dataType: 'json'
+            })
+            .done(function (data) {
+                document.getElementById("alert").style.display = 'none';
                 endtime = data['current-end'];
                 points_funded = data['points-funded'];
                 points_to_fully_fund = data['points-to-fully-fund'];
-            }, "json");
+            })
+            .fail(function (){
+                document.getElementById("alert").style.display = 'block';
+            });
         }
 
         function updatePoints() {
@@ -167,8 +191,7 @@
             $.when(A, B).done(function(){
                 config = A.responseJSON
                 data = B.responseJSON
-                console.log(config)
-                console.log(data)
+
                 document.getElementById("timer_start_datetime").value = data['stream-start']
                 document.getElementById("timer_stream_end_datetime").value = data['stream-end']
                 document.getElementById("timer_stream_current_end_datetime").value = data['current-end']
