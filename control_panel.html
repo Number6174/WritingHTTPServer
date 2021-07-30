@@ -160,6 +160,19 @@
             update()
         };
 
+        document.getElementById("timer_points_set").onclick=async () =>{
+            jQuery.ajax('/event?points=set&amount=' + document.getElementById("timer_points_qty").value  )
+            update()
+        };
+        document.getElementById("timer_points_increase").onclick=async () =>{
+            jQuery.ajax('/event?points=increase&amount=' + document.getElementById("timer_points_qty").value  )
+            update()
+        };
+        document.getElementById("timer_points_decrease").onclick=async () =>{
+            jQuery.ajax('/event?points=decrease&amount=' + document.getElementById("timer_points_qty").value  )
+            update()
+        };
+
     </script>
 
     <h3>Timer Configuration</h3>

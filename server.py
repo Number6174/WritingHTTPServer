@@ -73,6 +73,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             
             adjust = 0
             points = 0
+            points_set = False
             if 'bits' in query:
                 amount = query['bits'][0]
                 points = int(config['event']['per100bits'] * int(amount) / 100)
@@ -123,14 +124,29 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 today_no_time = datetime.datetime.combine(datetime.date.today(), datetime.time())
                 amount = (parse(query['amount'][0]) - today_no_time).total_seconds()
 
-                adjust = direction * amount
+                adjust = int(direction * amount)
 
             elif 'points' in query:
+                direction = 0
+                if query['points'][0] == 'increase':
+                    direction = 1
+                elif query['points'][0] == 'decrease':
+                    direction = -1
+                elif query['points'][0] == 'set':
+                    direction = 1
+                    points_set = True
+                else:
+                    #Invalid
+                    self.log_message('Event points with invalid value')
+                    self.send_response(400)
+                    return
+
                 if 'amount' not in query:
                     self.log_message('Points even with no amount')
                     self.send_response(400)
                     return
 
+                points = direction * int(query['amount'][0])
 
 
             # Read in timer info
@@ -139,7 +155,10 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 timer_data = json.load(f)
 
             # Add to total
-            timer_data['points-funded'] += points
+            if points_set:
+                timer_data['points-funded'] = points
+            else:
+                timer_data['points-funded'] += points
             timer_data['time-adjust'] += adjust
 
             # Calculate stream end
