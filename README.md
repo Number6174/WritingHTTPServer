@@ -132,6 +132,10 @@ Presses `F14`.
 
 Presses `a` four times.
 
+    http://127.0.0.1:8001/keypress?key=f13&mod=ctrl&repeat=4&delay=500
+
+Presses `f13` four times with a delay of 0.5 seconds between each press.
+
 ### AutoHotkey
 Depending on your usage you may need to combine with [AutoHotKey](https://www.autohotkey.com/) to send keypresses
 to specific windows, such as:
@@ -175,3 +179,8 @@ It would result in the file `filename.txt` containing something like:
 
     2021-04-08T09:37:20.769127 - 1
     2021-04-08T09:37:21.799855 - 2
+
+# Notes
+If you intend to build an exe using py2exe, you must first install `py2exe` via pip, then run:
+
+    python setup.py py2exe

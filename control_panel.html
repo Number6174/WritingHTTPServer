@@ -328,7 +328,7 @@
     <input type="checkbox" id="keypress_mod_shift_r" /> shift_r
     <input type="checkbox" id="keypress_mod_super" /> super
     <br />
-    Repeat: <input type="number" id="keypress_repeat" value=1 />
+    Repeat: <input type="number" id="keypress_repeat" value=1 /> times with a delay of <input type="number" id="keypress_delay" /> milliseconds
     <br />
     Key: <input type="text" id="keypress_input" /> <input type="button" id="kepress_test" value="Test" />
     <br />
@@ -373,6 +373,10 @@
 
             if (document.getElementById("keypress_repeat").value != 1) {
                 path += '&repeat=' + document.getElementById("keypress_repeat").value
+            
+                if (document.getElementById("keypress_delay").value != 1) {
+                    path += '&delay=' + document.getElementById("keypress_delay").value
+                }
             }
             jQuery.ajax(path)
 

@@ -5,6 +5,8 @@ import datetime
 import json
 from dateutil.parser import parse
 import pynput
+import threading
+import time
 
 class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -217,7 +219,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.success_response()
 
     def handle_keypress(self):
-        from pynput.keyboard import Key, Controller
+        from pynput.keyboard import Key
         # Extract query
         query = parse_qs(urlparse(self.path).query)
 
@@ -236,7 +238,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         # Determine key to press
         modifiers = []
         if 'mod' in query:
-            modifiers = query['mod]']
+            modifiers = [modifiers_map[x] for x in query['mod']]
 
         if 'key' not in query:
             self.log_message("Requested keypress with no key")
@@ -248,9 +250,9 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         if keystring in 'abcdefghijklmnopqrstuvwxyz0123456789':
             key = keystring
         elif keystring in key_map:
-            key = key_map[key]
+            key = key_map[keystring]
         else:
-            self.log_message("Unknown key")
+            self.log_message("Unknown key: %s", keystring)
             self.send_error(400)
             return
 
@@ -258,19 +260,15 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         if 'repeat' in query:
             repeat = int(query['repeat'][0])
 
-        keyboard = Controller()
+        delay = 0
+        if 'delay' in query and repeat != 1:
+            delay = int(query['delay'][0]) / 1000
 
-        # Press modifiers
-        for m in modifiers:
-            keyboard.press(modifiers_map[m])
+        self.log_message("Pressing key %s with modifiers %s and repeat of %i and delay %i", key, modifiers, repeat, delay)
 
-        # Press key
-        for i in range(repeat):
-            keyboard.tap(key)
-
-        # Release modifiers
-        for m in modifiers:
-            keyboard.release(modifiers_map[m])
+        #keypressWorker(modifiers, key, repeat, delay)
+        x = threading.Thread(target=keypressWorker, args=(modifiers, key, repeat, delay))
+        x.start()
 
         self.success_response()
 
@@ -315,6 +313,24 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.log_message("'" + filename + "' was appended with '" + data + "'")
 
         self.success_response()
+
+def keypressWorker(modifiers, key, repeat, delay):
+    keyboard = pynput.keyboard.Controller()
+
+    for i in range(repeat):
+        # Press modifiers
+        for m in modifiers:
+            keyboard.press(m)
+
+        # Press key
+        keyboard.tap(key)
+
+        # Release modifiers
+        for m in modifiers:
+            keyboard.release(m)
+
+        time.sleep(delay)
+        
 
 def readConfig(filename):
     with open(filename) as f:
