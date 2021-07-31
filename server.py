@@ -32,7 +32,6 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         url = urlparse(self.path)
         if url.path == '/api/configwriter/timer_data':
-            #self.log_message("About to update timer_data.json with %s", data)
             with open('timer_data.json', 'w') as f:
                 json.dump(data, f, indent=4)
             self.log_message('Updated timer_data.json')
