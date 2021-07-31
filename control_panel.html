@@ -312,7 +312,39 @@
     </script>
 
     <h1>Keypress</h1>
-    
 
+
+    <h1>File Writing</h1>
+    This does not write to any file, but just aid in providing a partial URL. Due to the browser security it will always show the file as being in C:\fakepath\, but it will show the pattern to use. Also replace <tt>foo</tt> with the data you wish to write out.
+
+    <br />
+    <br />
+
+    I want to write to the file: <input type="file" id="file_name" />
+    <br />
+    I want to <input type="radio" name="file_mode" /> overwrite <input type="radio" name="file_mode" id="file_mode_append" /> append
+    <br />
+    <input type="checkbox" id="file_log" /> Include timestamps?
+    <br />
+    <input type="button" id="file_button" value="Generate URL" /> <input type="text" id="file_textbox" />
+
+    <script>
+        document.getElementById("file_button").onclick=async () =>{
+            const host = window.location.href
+            const filename = encodeURI(document.getElementById("file_name").value)
+            let url = host + 'write?filename=' + filename
+
+            if (document.getElementById("file_mode_append").checked) {
+                url += '&mode=a'
+            }
+            if (document.getElementById("file_log").checked) {
+                url += '&log=true'
+            }
+
+            url += '&data=foo'
+
+            document.getElementById("file_textbox").value = url
+        };
+    </script>
   </body>
 </html>
