@@ -17,6 +17,7 @@ The provided configuration has it listen only on 127.0.0.1. It is not recommende
 `python --version` in the Windows Terminal. You should see a response like `Python 3.9.3`
 3. Ensure the following Python packages are installed. You may wish to do this in a [venv](https://docs.python.org/3/tutorial/venv.html). Each can be installed as `pip install`
     * python-dateutil
+    * pynput
 
 # Configuration
 
@@ -107,6 +108,42 @@ To arbitrarily shift the timer or points
 Where `howmuch` is either a string to go through dateutil's parser for the time amounts, or an integer for the points.
 
 Each version of this endpoint will appropriately adjust the timer.
+
+## /keypress
+
+This endpoint simulates keypresses. This uses [pynput](https://pynput.readthedocs.io/en/latest/index.html), so
+that does mean there are some [limitations](https://pynput.readthedocs.io/en/latest/limitations.html#windows).
+
+
+The keys supported are a-z, 0-9, f1-f20 with modifiers alt, alt_gr, alt_l, alt_r, ctrl, ctrl_l, ctrl_r, 
+shift, shift_l, shift_r, and super.
+
+Select one key and as many modifiers as you like. For example
+
+    http://127.0.0.1:8001/keypress?key=a&mod=alt&mod=shift&mod=ctrl
+
+Presses `Ctrl+Alt+Shift-a`.
+
+    http://127.0.0.1:8001/keypress?key=f14
+
+Presses `F14`.
+
+    http://127.0.0.1:8001/keypress?key=a&repeat=4
+
+Presses `a` four times.
+
+### AutoHotkey
+Depending on your usage you may need to combine with [AutoHotKey](https://www.autohotkey.com/) to send keypresses
+to specific windows, such as:
+
+    ^F13::
+    SetKeyDelay, 50,100 ; This helps with reliability.
+    ControlSend,, b, Window Title
+    return
+
+This example takes `Ctrl-F13` and sends the key `b` to an application with the window title `Window Title`.
+
+This kind of workaround is often useful to send a specific keystroke to a program that is not the active program.
 
 ## /write
 

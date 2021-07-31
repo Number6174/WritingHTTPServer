@@ -313,6 +313,73 @@
 
     <h1>Keypress</h1>
 
+    Valid keys are a-z, 0-9, f1-f20.
+    <br />
+    Modifiers:
+    <input type="checkbox" id="keypress_mod_alt" /> alt
+    <input type="checkbox" id="keypress_mod_alt_gr" /> alt_gr
+    <input type="checkbox" id="keypress_mod_alt_l" /> alt_l
+    <input type="checkbox" id="keypress_mod_alt_r" /> alt_r
+    <input type="checkbox" id="keypress_mod_ctrl" /> ctrl
+    <input type="checkbox" id="keypress_mod_ctrl_l" /> ctrl_l
+    <input type="checkbox" id="keypress_mod_ctrl_r" /> ctrl_r
+    <input type="checkbox" id="keypress_mod_shift" /> shift
+    <input type="checkbox" id="keypress_mod_shift_l" /> shift_l
+    <input type="checkbox" id="keypress_mod_shift_r" /> shift_r
+    <input type="checkbox" id="keypress_mod_super" /> super
+    <br />
+    Repeat: <input type="number" id="keypress_repeat" value=1 />
+    <br />
+    Key: <input type="text" id="keypress_input" /> <input type="button" id="kepress_test" value="Test" />
+    <br />
+    Corresponding URL: <input type="text" id="keypress_url" />
+
+    <script>
+        document.getElementById("kepress_test").onclick=async () =>{
+            let path = '/keypress?key=' + document.getElementById("keypress_input").value
+            if (document.getElementById("keypress_mod_alt").checked) {
+                path += '&mode=alt'
+            }
+            if (document.getElementById("keypress_mod_alt_gr").checked) {
+                path += '&mode=alt_gr'
+            }
+            if (document.getElementById("keypress_mod_alt_l").checked) {
+                path += '&mode=alt_l'
+            }
+            if (document.getElementById("keypress_mod_alt_r").checked) {
+                path += '&mode=alt_r'
+            }
+            if (document.getElementById("keypress_mod_ctrl").checked) {
+                path += '&mode=ctrl'
+            }
+            if (document.getElementById("keypress_mod_ctrl_l").checked) {
+                path += '&mode=ctrl_l'
+            }
+            if (document.getElementById("keypress_mod_ctrl_r").checked) {
+                path += '&mode=ctrl_r'
+            }
+            if (document.getElementById("keypress_mod_shift").checked) {
+                path += '&mode=shift'
+            }
+            if (document.getElementById("keypress_mod_shift_l").checked) {
+                path += '&mode=shift_l'
+            }
+            if (document.getElementById("keypress_mod_shift_r").checked) {
+                path += '&mode=shift_r'
+            }
+            if (document.getElementById("keypress_mod_super").checked) {
+                path += '&mode=super'
+            }
+
+            if (document.getElementById("keypress_repeat").value != 1) {
+                path += '&repeat=' + document.getElementById("keypress_repeat").value
+            }
+            jQuery.ajax(path)
+
+            document.getElementById("keypress_url").value = window.location.href + path
+        }
+    </script>
+
 
     <h1>File Writing</h1>
     This does not write to any file, but just aid in providing a partial URL. Due to the browser security it will always show the file as being in C:\fakepath\, but it will show the pattern to use. Also replace <tt>foo</tt> with the data you wish to write out.

@@ -4,6 +4,7 @@ from urllib.parse import parse_qs
 import datetime
 import json
 from dateutil.parser import parse
+import pynput
 
 class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -16,6 +17,8 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.handle_api()
         elif url.path == '/event':
             self.handle_event()
+        elif url.path =='/keypress':
+            self.handle_keypress()
         elif url.path == '/write':
             self.handle_write()
         elif url.path == '/timer':
@@ -213,6 +216,63 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         
         self.success_response()
 
+    def handle_keypress(self):
+        from pynput.keyboard import Key, Controller
+        # Extract query
+        query = parse_qs(urlparse(self.path).query)
+
+        modifiers_map = {
+            'alt': Key.alt, 'alt_gr': Key.alt_gr, 'alt_l': Key.alt_l, 'alt_r': Key.alt_r, 'ctrl': Key.ctrl,
+            'ctrl_l': Key.ctrl_l, 'ctrl_r': Key.ctrl_r, 'shift': Key.shift, 'shift_l': Key.shift_l,
+            'shift_r': Key.shift_r, 'super': Key.cmd
+        }
+        key_map = {
+            'f1': Key.f1, 'f2': Key.f2, 'f3': Key.f3, 'f4': Key.f4, 'f5': Key.f5, 'f6': Key.f6, 'f7': Key.f7,
+            'f8': Key.f8, 'f9': Key.f9, 'f10': Key.f10, 'f11': Key.f11, 'f12': Key.f12, 'f13': Key.f13,
+            'f14': Key.f14, 'f15': Key.f15, 'f16': Key.f16, 'f17': Key.f17, 'f18': Key.f18, 'f19': Key.f19,
+            'f20': Key.f20
+        }
+
+        # Determine key to press
+        modifiers = []
+        if 'mod' in query:
+            modifiers = query['mod]']
+
+        if 'key' not in query:
+            self.log_message("Requested keypress with no key")
+            self.send_error(400)
+            return
+
+        keystring = query['key'][0]
+        key = ''
+        if keystring in 'abcdefghijklmnopqrstuvwxyz0123456789':
+            key = keystring
+        elif keystring in key_map:
+            key = key_map[key]
+        else:
+            self.log_message("Unknown key")
+            self.send_error(400)
+            return
+
+        repeat = 1
+        if 'repeat' in query:
+            repeat = int(query['repeat'][0])
+
+        keyboard = Controller()
+
+        # Press modifiers
+        for m in modifiers:
+            keyboard.press(modifiers_map[m])
+
+        # Press key
+        for i in range(repeat):
+            keyboard.tap(key)
+
+        # Release modifiers
+        for m in modifiers:
+            keyboard.release(modifiers_map[m])
+
+        self.success_response()
 
     def handle_write(self):
         # Extract query
