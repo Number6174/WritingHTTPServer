@@ -24,6 +24,40 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.log_message("Ignoring request to " + self.path)
             self.send_error(404)
 
+    def do_PUT(self):
+        # Acquire the PUT data
+        content_length = int(self.headers['Content-Length'])
+        raw_data = self.rfile.read(content_length)
+        data = json.loads(raw_data, parse_float=float, parse_int=int)
+
+        url = urlparse(self.path)
+        if url.path == '/api/configwriter/timer_data':
+            #self.log_message("About to update timer_data.json with %s", data)
+            with open('timer_data.json', 'w') as f:
+                json.dump(data, f, indent=4)
+            self.log_message('Updated timer_data.json')
+        elif url.path == '/api/configwriter/config':
+            self.log_message("About to update config.json with %s", data)
+            with open('config.json', 'r') as f:
+                existing = json.load(f)
+
+            # Copy the two settings we don't allow changing by the control panel
+            data['host'] = existing['host']
+            data['port'] = existing['port']
+            with open('config.json', 'w') as f:
+                json.dump(data, f, indent=4)
+            
+            # Reload config for rest of program
+            global config
+            config = readConfig('config.json')
+            self.log_message('Updated config.json')
+        else:
+            self.log_message("Ignoring PUT to " + self.path)
+            self.send_error(400)
+            return
+
+        self.success_response()
+
     def success_response(self):
         # Write response
         self.send_response(200)

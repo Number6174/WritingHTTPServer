@@ -260,6 +260,46 @@
             read_timer_every_config();
         };
 
+        document.getElementById("config_current_write").onclick=async () =>{
+            jQuery.ajax({
+                url: '/api/configwriter/timer_data',
+                method: 'PUT',
+                data: JSON.stringify({
+                    "stream-start": document.getElementById("timer_start_datetime").value,
+                    "stream-end": document.getElementById("timer_stream_end_datetime").value,
+                    "current-end": document.getElementById("timer_stream_current_end_datetime").value,
+                    "points-funded": parseInt(document.getElementById("timer_points_funded").value),
+                    "points-to-fully-fund": parseInt(document.getElementById("timer_points_to_fully_fund").value),
+                    "time-adjust": parseInt(document.getElementById("timer_time_adjust").value)
+                })
+            });
+        };
+
+        document.getElementById("config_every_write").onclick=async () =>{
+            jQuery.ajax({
+                url: '/api/configwriter/config',
+                method: 'PUT',
+                data: JSON.stringify({
+                    "event": {
+                        "per100bits": parseInt(document.getElementById("config_timer_bits").value),
+                        "perdollartip": parseInt(document.getElementById("config_timer_tips").value),
+                        "tip-fee-percent": parseFloat(document.getElementById("config_timer_tip_fee_percent").value),
+                        "tip-fee-fixed": parseFloat(document.getElementById("config_timer_fee_fixed").value),
+                        "prime-sub": parseInt(document.getElementById("config_timer_prime_sub").value),
+                        "t1-sub": parseInt(document.getElementById("config_timer_t1_sub").value),
+                        "t2-sub": parseInt(document.getElementById("config_timer_t2_sub").value),
+                        "t3-sub": parseInt(document.getElementById("config_timer_t3_sub").value)
+                    },
+                    "timer": {
+                        "stream-start": document.getElementById("config_timer_start").value,
+                        "timer-start": document.getElementById("config_timer_initial").value,
+                        "time-fundable": document.getElementById("config_timer_max_fund_time").value,
+                        "points-to-fully-fund": parseInt(document.getElementById("config_timer_max_points").value)
+                    }
+                })
+            });
+        };
+
 
         function updateAll() {
             update() // Timer

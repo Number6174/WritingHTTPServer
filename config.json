@@ -1,11 +1,9 @@
 {
-    "host": "127.0.0.1",
-    "port": 8001,
     "event": {
         "per100bits": 100,
         "perdollartip": 100,
-        "tip-fee-percent": 2.90,
-        "tip-fee-fixed": 0.30,
+        "tip-fee-percent": 2.9,
+        "tip-fee-fixed": 0.3,
         "prime-sub": 250,
         "t1-sub": 250,
         "t2-sub": 500,
@@ -16,5 +14,7 @@
         "timer-start": "3h",
         "time-fundable": "9h",
         "points-to-fully-fund": 10000
-    }
+    },
+    "host": "127.0.0.1",
+    "port": 8001
 }
