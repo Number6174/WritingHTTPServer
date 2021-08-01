@@ -30,7 +30,7 @@ jobs:
         python setup.py py2exe
     - name: Zip Files
       run: |
-        zip -r WritingHTTPServer${{github.ref}} dist/*
+        7z a -tzip -r WritingHTTPServer${{github.ref}} dist/*
     - name: Create release
       run: echo "Release"
         #id: create_release
