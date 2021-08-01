@@ -11,6 +11,7 @@ setup(
             'compressed': True,
         }
     },
-    data_files = [('.', ['config.json', 'control_panel.html'])],
+    data_files = [('.', ['config.json', 'control_panel.html', 'README.md', 'LICENSE']),
+                  ('examples', ['examples/timer.html', 'examples/clock.png'])],
     console=['server.py']
 )
