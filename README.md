@@ -1,8 +1,8 @@
 # WritingHTTPServer
-A simple Python HTTP server that writes GET parameters to a specified file.
-It also supports a timer that can be extended by specific events.
+A simple Python HTTP server that writes to files, simulates keypresses, records events, manages a timer,
+and manages information about a hype train.
 
-WARNING: This is a very purpose driven program. If you don't completely understand how to use it, it could
+**WARNING**: This is a very purpose driven program. If you don't completely understand how to use it, it could
 expose you to security vulnerabilities. Do not open this program to the broader internet. Only allow it to
 accept local connections. It uses Python's [http.server](https://docs.python.org/3/library/http.server.html)
 which is not hardened. In addition, the CORS header `Access-Control-Allow-Origin` is set to `*` for some end
@@ -12,21 +12,41 @@ The provided configuration has it listen only on 127.0.0.1. It is not recommende
 
 # Setup
 
+## Using a release version
+1. Download the zip file from the [latest release](https://github.com/Number6174/WritingHTTPServer/releases/latest)
+2. Unzip in a directory where the script will have write permissions
+
+## Manual
 1. Install Python for [Windows](https://www.python.org/downloads/windows/) (tested with 3.9.3)
 2. Verify Python is in your PATH. This can be done by running
 `python --version` in the Windows Terminal. You should see a response like `Python 3.9.3`
-3. Ensure the following Python packages are installed. You may wish to do this in a [venv](https://docs.python.org/3/tutorial/venv.html). Each can be installed as `pip install`
+3. Ensure the following Python packages are installed. You may wish to do this in a [venv](https://docs.python.org/3/tutorial/venv.html). Each can be installed as `pip install` or just use `pip install -r requirements.txt`
     * python-dateutil
     * pynput
+
+# Use
+
+## Using a release version
+1. Unzip the downloaded zip into a location where the program will have write permissions.
+2. Run `server.exe`.
+
+To stop the program, just close the terminal window.
+
+## Manual
+Open up a terminal. Navigate to the directory where `server.py` exists.
+Type `python server.py`
+
+To stop the program, hit CTRL+C.
 
 # Configuration
 
 ## Web interface
 
-When the script is running, on say port 8001, accessing [http://127.0.0.1:8001](http://127.0.0.1:8001) will provide
-a web interface to many of the options of the script.
+When the script is running, on say port 8001, accessing [http://127.0.0.1:8001](http://127.0.0.1:8001) will
+provide a web interface to many of the options of the script. Everything can be edited here except the
+`host` and `port`.
 
-## `config.json`
+## config.json
 
 Edit the included `config.json`. The program must be restarted to load any configuration changes
 
@@ -53,14 +73,8 @@ Under `timer`, you'll find:
 * `time-fundable` - How long the timer can be extended, e.g. `9h`
 * `points-to-fully-fund` - How many points from events need to occur to fully fund
 
-# Use
-
-Open up a terminal. Navigate to the directory where `server.py` exists.
-Type `python server.py`
-
-It will start a webserver on port 8001. The port is configurable only by editing the script.
-
-To stop the program, hit CTRL+C.
+# Endpoints
+This program provides several endpoint accessible over HTTP. The GET endpoints that are documented here are the only ones you should rely upon.
 
 ## /api
 This provides REST style information. These are here to simplify using some of the information managed by this script.
@@ -184,3 +198,5 @@ It would result in the file `filename.txt` containing something like:
 If you intend to build an exe using py2exe, you must first install `py2exe` via pip, then run:
 
     python setup.py py2exe
+
+For support file Github issues or join the [Discord](https://discord.gg/MpN36Fnpf2).
