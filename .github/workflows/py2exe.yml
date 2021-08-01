@@ -31,12 +31,13 @@ jobs:
       run: |
         zip -r WritingHTTPServer${{github.ref}} dist/*
     - name: Create release
-        id: create_release
-        env:
-            GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        with:
-            tag_name: ${{github.ref}}
-            release_name: Release ${{github.ref}}
-            body: Test
-            draft: false
-            prerelease: false
+      run: echo "Release"
+        #id: create_release
+        #env:
+        #    GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        #with:
+        #    tag_name: ${{github.ref}}
+        #    release_name: Release ${{github.ref}}
+        #    body: Test
+        #    draft: false
+        #    prerelease: false
