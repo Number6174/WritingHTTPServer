@@ -82,20 +82,19 @@ Under `timer`, you'll find:
 * `points-to-fully-fund` - How many points from events need to occur to fully fund
 
 # Endpoints
-This program provides several endpoint accessible over HTTP. The GET endpoints that are documented here are the only ones you should rely upon.
+This program provides several endpoint accessible over HTTP. The endpoints that are documented here are the only
+ones you should rely upon.
 
 ## /api
-This provides REST style information. These are here to simplify using some of the information managed by this script.
-It permits an HTML file to not care where a file is present on a hard drive and need only know the URL to obtain the
-data.
+This provides REST style information. These are here to simplify using some of the information managed by this
+script. It permits an HTML file to not care where a file is present on a hard drive and need only know the URL
+to obtain the data.
 
-### /api/timer
-Returns the contents of `timer_data.json`. 
+### GET /api/timer
+Returns the contents of `timer_data.json`. This is the best way to obtain the current timer information.
+See [examples/timer.html](examples/timer.html) for how you might use this.
 
-### /api/config
-Returns the contents of `config.json`.
-
-## /event
+## GET /event
 
 This endpoint records various events. It is recommended you call this endpoint for each bit, sub, and tip.
 
@@ -131,7 +130,7 @@ Where `howmuch` is either a string to go through dateutil's parser for the time 
 
 Each version of this endpoint will appropriately adjust the timer.
 
-## /keypress
+## GET /keypress
 
 This endpoint simulates keypresses. This uses [pynput](https://pynput.readthedocs.io/en/latest/index.html), so
 that does mean there are some [limitations](https://pynput.readthedocs.io/en/latest/limitations.html#windows).
@@ -171,7 +170,7 @@ This example takes `Ctrl-F13` and sends the key `b` to an application with the w
 
 This kind of workaround is often useful to send a specific keystroke to a program that is not the active program.
 
-## /write
+## GET /write
 
 For URLs of the form:
 
