@@ -94,6 +94,12 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(bytes(json.dumps(data, indent=4), "utf8"))
             return
+        elif url.path == '/api/version':
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.end_headers()
+            self.wfile.write(bytes(version_string(), "utf8"))
+            return
         self.log_message('Unknown API call ' + url.path)
         self.send_error(400)
 
@@ -379,13 +385,15 @@ def ensureTimerSetup(config):
     with open('timer_data.json', 'w') as f:
         json.dump(timer_data, f, indent=4)
 
+def version_string():
+    return "0.0.2"
 
 def startServer():
     global config
     config = readConfig('config.json')
     ensureTimerSetup(config)
  
-    print("WritingHTTPServer 0.0.2 by Number6174")
+    print("WritingHTTPServer " + version_string() + " by Number6174")
     print("Server started on http://" + config['host'] + ":" + str(config['port']))
     print("Use CTRL+C to stop")
 

@@ -26,6 +26,42 @@ SPDX-License-Identifier: Apache-2.0
         Error: Unable to connect to script
     </div>
 
+
+    <h1>WritingHTTPServer <span id="version_number">0.0.0</span></h1>
+
+    <div id="update_alert"></div>
+
+    <script>
+        function get_version() {
+            jQuery.ajax({
+                url: '/api/version',
+                dataType: 'text'
+            })
+            .done(function (data) {
+                document.getElementById("version_number").innerHTML = data
+            })
+        }
+
+        function version_check() {
+            jQuery.ajax({
+                url: 'https://api.github.com/repos/Number6174/WritingHTTPServer/releases/latest',
+                dataType: 'json'
+            })
+            .done(function (data) {
+                published_version = data['tag_name']
+
+                if (published_version > document.getElementById("version_number").innerHTML) {
+                    document.getElementById("update_alert").innerHTML = "Version " + published_version + " is available. Please update when you can."
+                }
+            })
+        }
+
+        get_version()
+        version_check()
+
+        setInterval(version_check, 1000 * 60 * 60); // 1k = 1s
+    </script>
+
     <h1>Timer Info</h1>
 
     <h3>Current time:</h3> 
