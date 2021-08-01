@@ -16,6 +16,6 @@ setup(
     },
     data_files = [('.', ['config.json', 'config.json.license', 'control_panel.html', 'README.md']),
                   ('examples', ['examples/timer.html', 'examples/clock.png', 'examples/clock.png.license']),
-                  ('LICENSES', ['LICENSES/CC0-1.0.txt', 'Apache-2.0.txt'])],
+                  ('LICENSES', ['LICENSES/CC0-1.0.txt', 'LICENSES/Apache-2.0.txt'])],
     console=['server.py']
 )
