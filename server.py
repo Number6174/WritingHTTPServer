@@ -385,7 +385,7 @@ def startServer():
     config = readConfig('config.json')
     ensureTimerSetup(config)
  
-    print("WritingHTTPServer 0.0.1 by Number6174")
+    print("WritingHTTPServer 0.0.2 by Number6174")
     print("Server started on http://" + config['host'] + ":" + str(config['port']))
     print("Use CTRL+C to stop")
 
