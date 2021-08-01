@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2021 Number6174
+SPDX-License-Identifier: CC0-1.0
+-->
+
 # WritingHTTPServer
 A simple Python HTTP server that writes to files, simulates keypresses, records events, manages a timer,
 and manages information about a hype train.
@@ -9,6 +14,9 @@ which is not hardened. In addition, the CORS header `Access-Control-Allow-Origin
 points which bypasses the security that CORS can help provide.
 
 The provided configuration has it listen only on 127.0.0.1. It is not recommended that you change this.
+
+[![REUSE status](https://api.reuse.software/badge/github.com/Number6174/WritingHTTPServer)](https://api.reuse.software/info/github.com/Number6174/WritingHTTPServer)
+
 
 # Setup
 

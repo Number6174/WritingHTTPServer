@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021 Number6174
+# SPDX-License-Identifier: Apache-2.0
+
 import http.server
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
