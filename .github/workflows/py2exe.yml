@@ -1,0 +1,42 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: py2exe
+
+on:
+  push:
+    tags:
+    - '[0-1]+.[0-1]+.[0-9]+'
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install python-dateuril pynput py2exe
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: py2exe freeze
+      run: |
+        python setup.py py2exe
+    - name: Zip Files
+      run: |
+        zip -r WritingHTTPServer${{github.ref}} dist/*
+    - name: Create release
+        id: create_release
+        env:
+            GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+            tag_name: ${{github.ref}}
+            release_name: Release ${{github.ref}}
+            body: Test
+            draft: false
+            prerelease: false
