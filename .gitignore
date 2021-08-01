@@ -130,3 +130,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Project specific
+# This is recreated by the script
+timer_data.json
