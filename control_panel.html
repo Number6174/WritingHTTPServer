@@ -330,12 +330,12 @@
     <br />
     Repeat: <input type="number" id="keypress_repeat" value=1 /> times with a delay of <input type="number" id="keypress_delay" /> milliseconds
     <br />
-    Key: <input type="text" id="keypress_input" /> <input type="button" id="kepress_test" value="Test" />
+    Key: <input type="text" id="keypress_input" /> 
     <br />
-    Corresponding URL: <input type="text" id="keypress_url" />
+    Corresponding URL: <input type="text" id="keypress_url" /> <input type="button" id="kepress_build" value="Build URL" /> <input type="button" id="kepress_test" value="Test URL" />
 
     <script>
-        document.getElementById("kepress_test").onclick=async () =>{
+        function keypress_build_url() {
             let path = '/keypress?key=' + document.getElementById("keypress_input").value
             if (document.getElementById("keypress_mod_alt").checked) {
                 path += '&mode=alt'
@@ -378,9 +378,17 @@
                     path += '&delay=' + document.getElementById("keypress_delay").value
                 }
             }
-            jQuery.ajax(path)
 
-            document.getElementById("keypress_url").value = window.location.href + path
+            return window.location.href + path
+        }
+
+        document.getElementById("kepress_build").onclick=async () =>{
+            document.getElementById("keypress_url").value = keypress_build_url()
+        }
+
+        document.getElementById("kepress_test").onclick=async () =>{
+            
+            jQuery.ajax(document.getElementById("keypress_url").value)
         }
     </script>
 
