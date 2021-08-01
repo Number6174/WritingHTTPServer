@@ -5,10 +5,8 @@ name: py2exe
 
 on:
   push:
-    branches:
-        - main
-    #tags:
-    #- '[0-1]+.[0-1]+.[0-9]+'
+    tags:
+    - '[0-1]+.[0-1]+.[0-9]+'
 
 jobs:
   build:
