@@ -68,10 +68,10 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
     def success_response(self):
         # Write response
         self.send_response(200)
-        self.send_header("Content-type", "text/html")
+        self.send_header("Content-type", "text/plain")
         self.end_headers()
-        html = f"<html><head></head><body>Success</body></html>"
-        self.wfile.write(bytes(html, "utf8"))
+        body = f"Success"
+        self.wfile.write(bytes(body, "utf8"))
 
     def handle_api(self):
         url = urlparse(self.path)
