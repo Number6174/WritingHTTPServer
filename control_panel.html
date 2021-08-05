@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
             .done(function (data) {
                 published_version = data['tag_name']
 
-                if (published_version > document.getElementById("version_number").innerHTML) {
+                if (published_version.trim() > document.getElementById("version_number").innerHTML.trim()) {
                     document.getElementById("update_alert").innerHTML = "Version " + published_version + " is available. Please update when you can."
                 }
             })
