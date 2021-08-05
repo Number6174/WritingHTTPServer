@@ -136,15 +136,44 @@ SPDX-License-Identifier: Apache-2.0
     <h3>Modify the timer</h3>
     Add:
     <br />
-    <input type="button" id="timer_add_prime" value="Prime" />
-    <input type="button" id="timer_add_t1" value="T1" />
-    <input type="button" id="timer_add_t2" value="T2" />
-    <input type="button" id="timer_add_t3" value="T3" />
+    Sub/Resub: 
+    <input type="text" id="timer_sub_name" value="FakeSubscriber" />
+    <input type="number" id="timer_sub_months" value="1" /> months with message 
+    <input type="text" id="timer_sub_message" value="Message" />
+    <input type="button" id="timer_sub_prime" value="Prime" />
+    <input type="button" id="timer_sub_t1" value="T1" />
+    <input type="button" id="timer_sub_t2" value="T2" />
+    <input type="button" id="timer_sub_t3" value="T3" />
 
     <br />
-    <input type="number" id="timer_bits_qty" /> <input type="button" id="timer_add_bits" value="Bits" />
+    Gift Sub: 
+    <input type="text" id="timer_gift_gifter" value="FakeGifter" /> gifts to
+    <input type="text" id="timer_gift_recipient" value="FakeRecipient" /> who is now subbed for
+    <input type="number" id="timer_gift_months" value="1" /> months 
+    <input type="button" id="timer_gift_t1" value="T1" />
+    <input type="button" id="timer_gift_t2" value="T2" />
+    <input type="button" id="timer_gift_t3" value="T3" />
+
     <br />
-    <input type="number" id="timer_tip_qty" /> <input type="button" id="timer_add_tip" value="Tip" />
+    Community Gift Sub: 
+    <input type="text" id="timer_community_name" value="FakeGifter" /> gifts subs to 
+    <input type="number" id="timer_community_amount" value="1" /> people 
+    <input type="button" id="timer_community_t1" value="T1" />
+    <input type="button" id="timer_community_t2" value="T2" />
+    <input type="button" id="timer_community_t3" value="T3" />
+
+    <br />
+    Bits: 
+    <input type="text" id="timer_bits_name" value="FakeCheerer" /> cheers
+    <input type="number" id="timer_bits_qty" value="100" /> bits with message
+    <input type="text" id="timer_bits_message" value="Message" />
+    <input type="button" id="timer_add_bits" value="Bits" />
+    <br />
+    Tip:
+    <input type="text" id="timer_tip_name" value="FakeTipper" /> tips
+    <input type="number" id="timer_tip_qty" value="5.00"/> with message
+    <input type="text" id="timer_tip_message" value="Message" />
+    <input type="button" id="timer_add_tip" value="Tip" />
     
     <br />
     <br />
@@ -158,29 +187,83 @@ SPDX-License-Identifier: Apache-2.0
     
 
     <script>
-        document.getElementById("timer_add_prime").onclick=async () =>{
-            jQuery.ajax('/event?name=Fake&sub=1&tier=Prime')
+        function timer_sub(tier) {
+            const username = document.getElementById("timer_sub_name").value
+            const months = document.getElementById("timer_sub_months").value
+            const message = document.getElementById("timer_sub_message").value
+
+            const path = '/event?sub=self&name=' + username + '&tier=' + tier + '&months=' + months + '&message=' + message
+            jQuery.ajax(path)
             updateAllTimer()
+        }
+        document.getElementById("timer_sub_prime").onclick=async () =>{
+            timer_sub('Prime')
         };
-        document.getElementById("timer_add_t1").onclick=async () =>{
-            jQuery.ajax('/event?name=Fake&sub=1&tier=Tier%201')
-            updateAllTimer()
+        document.getElementById("timer_sub_t1").onclick=async () =>{
+            timer_sub('Tier 1')
         };
-        document.getElementById("timer_add_t2").onclick=async () =>{
-            jQuery.ajax('/event?name=Fake&sub=1&tier=Tier%202')
-            updateAllTimer()
+        document.getElementById("timer_sub_t2").onclick=async () =>{
+            timer_sub('Tier 2')
         };
-        document.getElementById("timer_add_t3").onclick=async () =>{
-            jQuery.ajax('/event?name=Fake&sub=1&tier=Tier%203')
-            updateAllTimer()
+        document.getElementById("timer_sub_t3").onclick=async () =>{
+            timer_sub('Tier 3')
         };
 
+        function timer_gift(tier) {
+            const gifter = document.getElementById("timer_gift_gifter").value
+            const recipient = document.getElementById("timer_gift_recipient").value
+            const months = document.getElementById("timer_sub_months").value
+
+            const path = '/event?sub=gift&gifter=' + gifter + '&recipient=' + recipient + '&tier=' + tier + '&months=' + months
+            jQuery.ajax(path)
+            updateAllTimer()
+        }
+        document.getElementById("timer_gift_t1").onclick=async () =>{
+            timer_gift('Tier 1')
+        };
+        document.getElementById("timer_gift_t2").onclick=async () =>{
+            timer_gift('Tier 2')
+        };
+        document.getElementById("timer_gift_t3").onclick=async () =>{
+            timer_gift('Tier 3')
+        };
+
+        function timer_community(tier) {
+            const name = document.getElementById("timer_community_name").value
+            const amount = document.getElementById("timer_community_amount").value
+ 
+            const path = '/event?sub=community&name=' + name + '&tier=' + tier + '&quantity=' + amount
+            jQuery.ajax(path)
+            updateAllTimer()
+        }
+        document.getElementById("timer_community_t1").onclick=async () =>{
+            timer_community('Tier 1')
+        };
+        document.getElementById("timer_community_t2").onclick=async () =>{
+            timer_community('Tier 2')
+        };
+        document.getElementById("timer_community_t3").onclick=async () =>{
+            timer_community('Tier 3')
+        };
+
+
+
         document.getElementById("timer_add_bits").onclick=async () =>{
-            jQuery.ajax('/event?name=Fake&bits=' + document.getElementById("timer_bits_qty").value  )
+            const username = document.getElementById("timer_bits_name").value
+            const amount = document.getElementById("timer_bits_qty").value
+            const message = document.getElementById("timer_sub_message").value
+
+            const path = '/event?name=' + username + '&bits=' + amount + '&message=' + message
+            jQuery.ajax(path)
             updateAllTimer()
         };
         document.getElementById("timer_add_tip").onclick=async () =>{
-            jQuery.ajax('/event?name=Fake&tip=' + document.getElementById("timer_tip_qty").value  )
+            const username = document.getElementById("timer_tip_name").value
+            const amount = document.getElementById("timer_tip_qty").value
+            const message = document.getElementById("timer_tip_message").value
+
+            const path = '/event?name=' + username + '&tip=' + amount + '&message=' + message
+            jQuery.ajax(path)
             updateAllTimer()
         };
 

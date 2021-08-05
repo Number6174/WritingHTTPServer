@@ -98,15 +98,58 @@ See [examples/timer.html](examples/timer.html) for how you might use this.
 
 This endpoint records various events. It is recommended you call this endpoint for each bit, sub, and tip.
 
-Each event should have both a name and event type. The name is specified by either `name` or `twitch_id`.
-The event type can be one of `bits`, `sub`, or `tip`.
+### Bits
+    http://127.0.0.1:8001/event?name=username&bits=amount&message=msg
 
-    http://127.0.0.1:8001/event?name=Username&bits=amount
-    http://127.0.0.1:8001/event?name=Username&sub=amount&tier=tier
-    http://127.0.0.1:8001/event?name=Username&tip=amount
+Where
+* `username` should be the display name of the cheerer
+* `amount` is an integer
+* `msg` is a string of the message.
 
-Amount must be an integer, typically the value of `1` except for community gift subs. Tier must be one of "Prime", "Tier 1", "Tier 2", or "Tier 3".
+If you are using Kruiz Control, this would be triggered by one of `OnSETwitchBits`, `OnSLTwitchBits`, or `OnSLTwitchBitsNoSync`.
 
+### Subs
+    http://127.0.0.1:8001/event?sub=self&name=username&tier=t&months=amount&message=msg
+
+Where
+* `username` should be the display name of the sub
+* `t` is the tier and must be one of "Prime", "Tier 1", "Tier 2", or "Tier 3".
+* `amount` is an integer
+* `msg` is a string along the message.
+
+If you are using Kruiz Control, this would be triggered by `OnSETwitchSub`, `OnSLTwitchSub`, or `OnSLTwitchSubNoSync`.
+
+    http://127.0.0.1:8001/event?sub=gift&gifter=username1&recipient=username2&tier=t&months=amount
+
+Where
+* `username1` should be the display name of the gifter
+* `username2` should be the display name of the recipient
+* `t` is the tier and must be one of "Tier 1", "Tier 2", or "Tier 3".
+* `amount` is an integer
+
+If you are using Kruiz Control, this would be triggered by `OnSETwitchGiftSub`, `OnSLTwitchGiftSub` `OnSLTwitchGiftSubNoSync`.
+
+    http://127.0.0.1:8001/event?sub=community&name=username&quantity=amount&tier=t
+
+Where
+* `username` should be the display name of the gifter
+* `amount` is an integer
+* `t` is the tier and must be one of "Tier 1", "Tier 2", or "Tier 3".
+
+If you are using Kruiz Control, this would be triggered by `OnSETwitchBulkGiftSub`, `OnSLTwitchCommunityGiftSub` `OnSLTwitchCommunityGiftSubNoSync`
+
+
+### Tips
+    http://127.0.0.1:8001/event?name=username&tip=amount&message=message
+
+Where
+* `username` should be the display name of the tipper
+* `amount` is a number, including floats
+* `msg` is a string of the message.
+
+If you are using Kruiz Control, this would be triggered by `OnSEDonation`, `OnSLDonation`, `OnSLDonationNoSync`, `OnSLTiltifyDonation`, `OnSLTiltifyDonationNoSync`, or similar
+
+### Hype train
 If you wish to use Hype Train information, use the following
 
     http://127.0.0.1:8001/event?train=start
@@ -118,6 +161,7 @@ If you wish to use Hype Train information, use the following
 If you are using Kruiz Control, this should correspond to the data you obtain from the events `OnHypeTrainStart`,
 `OnHypeTrainEnd`, `OnHypeTrainProgress`, `OnHypeTrainConductor`, and `OnHypeTrainCooldownExpired`, respectively.
 
+### Shifting timer
 To arbitrarily shift the timer or points
 
     http://127.0.01:8001/event?time=increase&amount=howmuch

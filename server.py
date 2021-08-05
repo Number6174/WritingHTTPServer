@@ -13,6 +13,10 @@ import threading
 import time
 
 class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def log_error(self, format, *args):
+        global logger
+        logger.error(format%args)
+        
     def log_message(self, format, *args):
         global logger
         logger.debug(format%args)
@@ -132,44 +136,89 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             pass
         else:
             # Non-hype train event
-            name = ""
-            if 'name' in query:
-                name = query['name'][0]
+
             
             adjust = 0
             points = 0
             points_set = False
             if 'bits' in query:
+                name = query['name'][0]
                 amount = query['bits'][0]
                 points = int(config['event']['per100bits'] * int(amount) / 100)
-                self.log_event('User: \'' + name + '\' cheered ' + amount + ' bits (' + str(points) + ' points)')
+                message = query['message'][0]
+                self.log_event('\'' + name + '\' cheered ' + amount + ' bits (' + str(points) + ' points): ' + message)
             elif 'sub' in query:
-                amount = int(query['sub'][0])
-                if not 'tier' in query:
-                    # Have a sub without a tier, that is an error
-                    self.log_message('Have a sub without a tier, skipping')
-                    self.send_error(400)
-                    return
-                tier = query['tier'][0]
-                if tier == 'Prime':
-                    points = int(config['event']['prime-sub']) * amount
-                elif tier == 'Tier 1':
-                    points = int(config['event']['t1-sub']) * amount
-                elif tier == 'Tier 2':
-                    points = int(config['event']['t2-sub']) * amount
-                elif tier == 'Tier 3':
-                    points = int(config['event']['t3-sub']) * amount
+                type = query['sub'][0]
+                if type == 'self':
+                    name = query['name'][0]
+                    tier = query['tier'][0]
+                    if tier == 'Prime':
+                        points = int(config['event']['prime-sub'])
+                    elif tier == 'Tier 1':
+                        points = int(config['event']['t1-sub'])
+                    elif tier == 'Tier 2':
+                        points = int(config['event']['t2-sub'])
+                    elif tier == 'Tier 3':
+                        points = int(config['event']['t3-sub'])
+                    else:
+                        # Invalid tier
+                        self.log_message('Have a self sub with a invalid tier')
+                        self.send_error(400)
+                        return
+                    months = query['months'][0]
+                    message = query['message'][0]
+
+                    self.log_event('\'' + name + '\' subbed ' + tier + ' for ' + months + ' months (' + str(points) + ' points): ' + message)
+                elif type == 'gift':
+                    gifter = query['gifter'][0]
+                    recipient = query['recipient'][0]
+                    tier = query['tier'][0]
+                    if tier == 'Tier 1':
+                        points = int(config['event']['t1-sub'])
+                    elif tier == 'Tier 2':
+                        points = int(config['event']['t2-sub'])
+                    elif tier == 'Tier 3':
+                        points = int(config['event']['t3-sub'])
+                    else:
+                        # Invalid tier
+                        self.log_message('Have a gift sub with a invalid tier')
+                        self.send_error(400)
+                        return
+                    months = query['months'][0]
+
+                    self.log_event('\'' + gifter + '\' gifted ' + tier + ' to \'' + recipient + '\' who now has ' + months + ' months (' + str(points) + ' points)')
+
+                elif type == 'community':
+                    name = query['name'][0]
+                    quantity =  int(query['quantity'][0])
+                    tier = query['tier'][0]
+                    if tier == 'Tier 1':
+                        points = int(config['event']['t1-sub']) * quantity
+                    elif tier == 'Tier 2':
+                        points = int(config['event']['t2-sub']) * quantity
+                    elif tier == 'Tier 3':
+                        points = int(config['event']['t3-sub']) * quantity
+                    else:
+                        # Invalid tier
+                        self.log_message('Have a community gift sub with a invalid tier')
+                        self.send_error(400)
+                        return
+
+                    self.log_event('\'' + name + '\' gifted ' + tier + ' to ' + str(quantity) + ' people (' + str(points) + ' points)')
+
+                    pass
                 else:
-                    # Invalid tier
-                    self.log_message('Have a sub with a invalid tier')
+                    self.log_error('Have a sub with invalid type, skipping')
                     self.send_error(400)
                     return
-                self.log_event('User: \'' + name + '\' ' + str(amount) + ' ' + tier + ' subs (' + str(points) + ' points)')
+
             elif 'tip' in query:
+                name = query['name'][0]
                 amount = float(query['tip'][0])
                 amount_after_fees = amount * (1.0 - config['event']['tip-fee-percent'] / 100) - config['event']['tip-fee-fixed']
                 points = int(config['event']['perdollartip'] * amount_after_fees)
-                self.log_event('User: \'' + name + '\' tipped ' + str(amount) + ' (' + str(points) + ' points)')
+                message = query['message'][0]
+                self.log_event('\'' + name + '\' tipped ' + str(amount) + ' (' + str(points) + ' points): ' + message)
             elif 'time' in query:
                 direction = 0
                 if query['time'][0] == 'increase':
@@ -190,7 +239,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 amount = (parse(query['amount'][0]) - today_no_time).total_seconds()
 
                 adjust = int(direction * amount)
-                self.log_event('Adjust timer by ' + adjust + ' seconds')
+                self.log_event('Adjust timer by ' + str(adjust) + ' seconds')
 
             elif 'points' in query:
                 direction = 0
@@ -213,7 +262,10 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                     return
 
                 points = direction * int(query['amount'][0])
-                self.log_event('Adjust timer by ' + points + ' points')
+                if points_set:
+                    self.log_event('Set timer to ' + str(points) + ' points')
+                else:
+                    self.log_event('Adjust timer by ' + str(points) + ' points')
 
 
             # Read in timer info
