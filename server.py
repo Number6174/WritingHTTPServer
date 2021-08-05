@@ -457,7 +457,7 @@ def ensureTimerSetup(config):
         json.dump(timer_data, f, indent=4)
 
 def version_string():
-    return "0.0.3"
+    return "0.0.4"
 
 def setup_logging():
     import logging.handlers
