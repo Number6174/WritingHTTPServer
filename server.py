@@ -6,12 +6,21 @@ from urllib.parse import urlparse
 from urllib.parse import parse_qs
 import datetime
 import json
+import logging
 from dateutil.parser import parse
 import pynput
 import threading
 import time
 
 class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, format, *args):
+        global logger
+        logger.debug(format%args)
+
+    def log_event(self, format, *args):
+        global logger
+        logger.info(format%args)
+
     def do_GET(self):
         # Handle the request
         url = urlparse(self.path)
@@ -124,7 +133,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             if 'bits' in query:
                 amount = query['bits'][0]
                 points = int(config['event']['per100bits'] * int(amount) / 100)
-                self.log_message('User: \'' + name + '\' cheered ' + amount + ' bits (' + str(points) + ' points)')
+                self.log_event('User: \'' + name + '\' cheered ' + amount + ' bits (' + str(points) + ' points)')
             elif 'sub' in query:
                 amount = int(query['sub'][0])
                 if not 'tier' in query:
@@ -146,12 +155,12 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                     self.log_message('Have a sub with a invalid tier')
                     self.send_error(400)
                     return
-                self.log_message('User: \'' + name + '\' ' + str(amount) + ' ' + tier + ' subs (' + str(points) + ' points)')
+                self.log_event('User: \'' + name + '\' ' + str(amount) + ' ' + tier + ' subs (' + str(points) + ' points)')
             elif 'tip' in query:
                 amount = float(query['tip'][0])
                 amount_after_fees = amount * (1.0 - config['event']['tip-fee-percent'] / 100) - config['event']['tip-fee-fixed']
                 points = int(config['event']['perdollartip'] * amount_after_fees)
-                self.log_message('User: \'' + name + '\' tipped ' + str(amount) + ' (' + str(points) + ' points)')
+                self.log_event('User: \'' + name + '\' tipped ' + str(amount) + ' (' + str(points) + ' points)')
             elif 'time' in query:
                 direction = 0
                 if query['time'][0] == 'increase':
@@ -172,6 +181,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 amount = (parse(query['amount'][0]) - today_no_time).total_seconds()
 
                 adjust = int(direction * amount)
+                self.log_event('Adjust timer by ' + adjust + ' seconds')
 
             elif 'points' in query:
                 direction = 0
@@ -194,6 +204,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                     return
 
                 points = direction * int(query['amount'][0])
+                self.log_event('Adjust timer by ' + points + ' points')
 
 
             # Read in timer info
@@ -275,7 +286,6 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         self.log_message("Pressing key %s with modifiers %s and repeat of %i and delay %i", key, modifiers, repeat, delay)
 
-        #keypressWorker(modifiers, key, repeat, delay)
         x = threading.Thread(target=keypressWorker, args=(modifiers, key, repeat, delay))
         x.start()
 
@@ -388,7 +398,44 @@ def ensureTimerSetup(config):
 def version_string():
     return "0.0.2"
 
+def setup_logging():
+    import logging.handlers
+
+    # Ensure there is a logs directory
+    import os
+    os.makedirs('logs', exist_ok=True)
+
+    # Setup a rotating debug log
+    debug_handler = logging.handlers.TimedRotatingFileHandler(
+        filename='logs/debug.log',
+        when='d',
+        interval=1,
+        backupCount=10
+    )
+    debug_formatter = logging.Formatter('%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s - %(message)s')
+    debug_handler.setFormatter(debug_formatter)
+    debug_handler.setLevel(logging.DEBUG)
+
+    # Setup rotating event log
+    event_handler = logging.handlers.TimedRotatingFileHandler(
+        filename='logs/events.log',
+        when='d',
+        interval=1,
+    )
+    event_formatter = logging.Formatter('%(asctime)s - %(message)s')
+    event_handler.setFormatter(event_formatter)
+    event_handler.setLevel(logging.INFO)
+
+    # Attach handlers
+    global logger
+    logger = logging.getLogger('root')
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(debug_handler)
+    logger.addHandler(event_handler)
+
+
 def startServer():
+    setup_logging()
     global config
     config = readConfig('config.json')
     ensureTimerSetup(config)

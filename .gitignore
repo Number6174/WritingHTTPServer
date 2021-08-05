@@ -134,3 +134,5 @@ dmypy.json
 # Project specific
 # This is recreated by the script
 timer_data.json
+
+logs/
