@@ -2,6 +2,24 @@
 SPDX-FileCopyrightText: 2021 Number6174
 SPDX-License-Identifier: Apache-2.0
 -->
+
+
+<!--
+    Notes for customizing this example:
+
+    1. Change the src of the img inside the timer div to match your desired clock background.
+    2. In the #timer section of the style tag, change the width and height to what you
+       want displayed. This is likely the size of your clock background.
+    3. Change the rotation angle and origin in the text tag inside the svg. It is currently
+       set to (45, 100, 100). Those are the angle, and the (x,y) coordinates specifying
+       the point to rotate about. You likely want the point to be the center of the space you want the
+       digits of the clock. The angle is measured in degrees with 0 being horizontal and proceeding
+       clockwise.
+    4. Customize the #time, #hours, #minutes, and #seconds id blocks in the style to suit your needs.
+       Not all the blocks are present currently, but can easily be added. Note that contrary to standard
+       CSS, this is inside a svg, so use fill to change the font color, not color.
+-->
+
 <!DOCTYPE html>
 <html>
 
