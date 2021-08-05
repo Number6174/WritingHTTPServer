@@ -352,6 +352,25 @@ SPDX-License-Identifier: Apache-2.0
         updateAll()
     </script>
 
+    <h1>Events</h1>
+
+    <textarea id="eventTextArea"></textarea>
+
+    <script>
+        function updateEventText() {
+            jQuery.ajax({
+                url: '/api/events',
+                //dataType: 'text'
+            })
+            .done(function (data) {
+                $('#eventTextArea').val(data);
+            })
+        }
+
+        updateEventText()
+        setInterval(updateEventText, 1000); // 1k = 1s
+    </script>
+
     <h1>Keypress</h1>
 
     Valid keys are a-z, 0-9, f1-f20.

@@ -103,6 +103,11 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(bytes(json.dumps(data, indent=4), "utf8"))
             return
+        elif url.path == '/api/events':
+            self.path = 'logs/events.log'
+            return http.server.SimpleHTTPRequestHandler.do_GET(self)
+            #with open('logs/events.log') as f:
+
         elif url.path == '/api/version':
             self.send_response(200)
             self.send_header("Content-type", "application/json")
