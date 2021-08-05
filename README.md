@@ -119,6 +119,7 @@ Where
 
 If you are using Kruiz Control, this would be triggered by `OnSETwitchSub`, `OnSLTwitchSub`, or `OnSLTwitchSubNoSync`.
 
+### Gift Subs
     http://127.0.0.1:8001/event?sub=gift&gifter=username1&recipient=username2&tier=t&months=amount
 
 Where
@@ -129,6 +130,7 @@ Where
 
 If you are using Kruiz Control, this would be triggered by `OnSETwitchGiftSub`, `OnSLTwitchGiftSub` `OnSLTwitchGiftSubNoSync`.
 
+### Community Gift Subs
     http://127.0.0.1:8001/event?sub=community&name=username&quantity=amount&tier=t
 
 Where
