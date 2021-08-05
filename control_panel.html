@@ -55,11 +55,6 @@ SPDX-License-Identifier: Apache-2.0
                 }
             })
         }
-
-        get_version()
-        version_check()
-
-        setInterval(version_check, 1000 * 60 * 60); // 1k = 1s
     </script>
 
     <h1>Timer Info</h1>
@@ -87,7 +82,7 @@ SPDX-License-Identifier: Apache-2.0
                 seconds
             };
         }
-        function updateClock() {
+        function updateTimerDisplay() {
             const t = getTimeRemaining(endtime);
             if (t.total <= 0) {
                 t.hours = 0;
@@ -98,7 +93,7 @@ SPDX-License-Identifier: Apache-2.0
             minutesSpan.innerHTML = ('0' + t.minutes).slice(-2);
             secondsSpan.innerHTML = ('0' + t.seconds).slice(-2);
         }
-        function updateFromServer() {
+        function updateTimerFromServer() {
             jQuery.ajax({
                 url: '/api/timer',
                 dataType: 'json'
@@ -120,9 +115,9 @@ SPDX-License-Identifier: Apache-2.0
             fundedPercentSpan.innerHTML = points_funded / points_to_fully_fund * 100;
         }
 
-        function update() {
-            updateFromServer();
-            updateClock();
+        function updateTimer() {
+            updateTimerFromServer();
+            updateTimerDisplay();
             updatePoints();
         }
 
@@ -136,9 +131,6 @@ SPDX-License-Identifier: Apache-2.0
         const fundedSpan = document.querySelector("#funded");
         const toFundSpan = document.querySelector("#to_fully_fund");
         const fundedPercentSpan = document.querySelector("#funded_percent");
-
-        update(); // run function once at first to avoid delay
-        setInterval(update, 1000); // 1k = 1s
     </script>
 
     <h3>Modify the timer</h3>
@@ -168,50 +160,50 @@ SPDX-License-Identifier: Apache-2.0
     <script>
         document.getElementById("timer_add_prime").onclick=async () =>{
             jQuery.ajax('/event?name=Fake&sub=1&tier=Prime')
-            updateAll()
+            updateAllTimer()
         };
         document.getElementById("timer_add_t1").onclick=async () =>{
             jQuery.ajax('/event?name=Fake&sub=1&tier=Tier%201')
-            updateAll()
+            updateAllTimer()
         };
         document.getElementById("timer_add_t2").onclick=async () =>{
             jQuery.ajax('/event?name=Fake&sub=1&tier=Tier%202')
-            updateAll()
+            updateAllTimer()
         };
         document.getElementById("timer_add_t3").onclick=async () =>{
             jQuery.ajax('/event?name=Fake&sub=1&tier=Tier%203')
-            updateAll()
+            updateAllTimer()
         };
 
         document.getElementById("timer_add_bits").onclick=async () =>{
             jQuery.ajax('/event?name=Fake&bits=' + document.getElementById("timer_bits_qty").value  )
-            updateAll()
+            updateAllTimer()
         };
         document.getElementById("timer_add_tip").onclick=async () =>{
             jQuery.ajax('/event?name=Fake&tip=' + document.getElementById("timer_tip_qty").value  )
-            updateAll()
+            updateAllTimer()
         };
 
         document.getElementById("timer_increase_time").onclick=async () =>{
             jQuery.ajax('/event?time=increase&amount=' + document.getElementById("timer_modify_text").value  )
-            updateAll()
+            updateAllTimer()
         };
         document.getElementById("timer_decrease_time").onclick=async () =>{
             jQuery.ajax('/event?time=decrease&amount=' + document.getElementById("timer_modify_text").value  )
-            updateAll()
+            updateAllTimer()
         };
 
         document.getElementById("timer_points_set").onclick=async () =>{
             jQuery.ajax('/event?points=set&amount=' + document.getElementById("timer_points_qty").value  )
-            updateAll()
+            updateAllTimer()
         };
         document.getElementById("timer_points_increase").onclick=async () =>{
             jQuery.ajax('/event?points=increase&amount=' + document.getElementById("timer_points_qty").value  )
-            updateAll()
+            updateAllTimer()
         };
         document.getElementById("timer_points_decrease").onclick=async () =>{
             jQuery.ajax('/event?points=decrease&amount=' + document.getElementById("timer_points_qty").value  )
-            updateAll()
+            updateAllTimer()
         };
 
     </script>
@@ -340,16 +332,6 @@ SPDX-License-Identifier: Apache-2.0
                 })
             });
         };
-
-
-        function updateAll() {
-            update() // Timer
-            read_timer_current_config()
-            read_timer_every_config()
-        }
-
-        // Onload
-        updateAll()
     </script>
 
     <h1>Events</h1>
@@ -360,15 +342,12 @@ SPDX-License-Identifier: Apache-2.0
         function updateEventText() {
             jQuery.ajax({
                 url: '/api/events',
-                //dataType: 'text'
+                dataType: 'text'
             })
             .done(function (data) {
                 $('#eventTextArea').val(data);
             })
         }
-
-        updateEventText()
-        setInterval(updateEventText, 1000); // 1k = 1s
     </script>
 
     <h1>Keypress</h1>
@@ -484,6 +463,44 @@ SPDX-License-Identifier: Apache-2.0
 
             document.getElementById("file_textbox").value = url
         };
+    </script>
+
+
+
+    <script>
+        // Update functions
+        function updateAllTimer() {
+            updateTimer() // Timer
+            read_timer_current_config()
+            read_timer_every_config()
+        }
+
+        // Run once on load
+
+        // Version check
+        get_version()
+        version_check()
+
+        // Timer
+        updateAllTimer()
+
+        // Event log
+        updateEventText()
+
+        
+        // Recurring updates
+        const one_second = 1000
+        const one_hour = 1000 * 60 * 60
+        const one_day = one_hour * 24
+
+        function frequent_update() {
+            updateTimer()
+            updateEventText()
+        }
+
+        // 1k = 1s
+        setInterval(frequent_update, one_second);
+        setInterval(version_check, one_day);
     </script>
   </body>
 </html>
