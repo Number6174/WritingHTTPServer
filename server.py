@@ -31,6 +31,8 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         if url.path == '/':
             self.path = 'control_panel.html'
             return http.server.SimpleHTTPRequestHandler.do_GET(self)
+        elif url.path == '/favicon.ico':
+            return http.server.SimpleHTTPRequestHandler.do_GET(self)
         elif url.path.startswith('/api'):
             self.handle_api()
         elif url.path == '/event':
