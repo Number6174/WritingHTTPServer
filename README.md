@@ -31,6 +31,7 @@ The provided configuration has it listen only on 127.0.0.1. It is not recommende
 3. Ensure the following Python packages are installed. You may wish to do this in a [venv](https://docs.python.org/3/tutorial/venv.html). Each can be installed as `pip install` or just use `pip install -r requirements.txt`
     * python-dateutil
     * pynput
+    * requests
 
 # Use
 
@@ -93,6 +94,19 @@ to obtain the data.
 ### GET /api/timer
 Returns the contents of `timer_data.json`. This is the best way to obtain the current timer information.
 See [examples/timer.html](examples/timer.html) for how you might use this.
+
+### GET /api/twitch/id_to_name
+For
+    http://127.0.0.1:8001/api/twitch/id_to_name?id=number
+
+Calls out to [AidenWallis' Customapi](https://customapi.aidenwallis.co.uk/) to convert a Twitch ID into a
+name. This endpoint caches the result in memory and should be used over using AidenWallis' server directly.
+It will be faster in any case that the cached value is used and it is more polite to Aiden's server.
+
+The parameter number is almost certainly an integer, but Twitch doesn't document this, so treat it as a string.
+
+Since the cache is in memory, the lifetime of the cache is the program's lifetime. So, to invalidate the cache
+simply restart the program.
 
 ## GET /event
 

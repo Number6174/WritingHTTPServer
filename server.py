@@ -117,7 +117,18 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(bytes(f.read(), 'utf-8'))
             return
-
+        elif url.path == '/api/twitch/id_to_name':
+            query = parse_qs(urlparse(self.path).query)
+            if 'id' not in query:
+                self.send_error(400)
+                return
+            response = twitch_id_to_name_cached(query['id'][0])
+            self.send_response(200)
+            self.send_header("Content-type", "text/plain")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(bytes(response, "utf8"))
+            return
         elif url.path == '/api/version':
             self.send_response(200)
             self.send_header("Content-type", "application/json")
@@ -457,6 +468,21 @@ def ensureTimerSetup(config):
 
     with open('timer_data.json', 'w') as f:
         json.dump(timer_data, f, indent=4)
+
+twitch_id_cache = {}
+def twitch_id_to_name_cached(id):
+    global twitch_id_cache
+
+    # Check if already cached
+    if id in twitch_id_cache:
+        return twitch_id_cache[id]
+    
+    import requests
+    r = requests.get('https://customapi.aidenwallis.co.uk/api/v1/twitch/toName/' + id)
+
+    twitch_id_cache[id] = r.text
+
+    return r.text
 
 def version_string():
     return "0.0.4"
