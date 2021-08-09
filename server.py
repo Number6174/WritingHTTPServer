@@ -146,11 +146,36 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         if 'train' in query:
             # Some kind of hype train event
-            pass
+            type = query['train'][0]
+            if type == 'start':
+                self.log_event('Hype Train Start')
+            elif type == 'end':
+                sub_conductor_id = query['sub_conductor'][0]
+                sub_conductor = twitch_id_to_name_cached(sub_conductor_id)
+                bit_conductor_id = query['bit_conductor'][0]
+                bit_conductor = twitch_id_to_name_cached(bit_conductor_id)
+
+                self.log_event("Hype Train End. Sub conductor %s, Bit conductor %s", sub_conductor, bit_conductor)
+            elif type == 'progress':
+                level = query['level'][0]
+                progress = query['progress'][0]
+                total = query['total'][0]
+                self.log_event("Hype Train Progress: Level %s Progress %s Total %s", level, progress, total)
+            elif type == 'conductor':
+                sub_conductor_id = query['sub_conductor'][0]
+                sub_conductor = twitch_id_to_name_cached(sub_conductor_id)
+                bit_conductor_id = query['bit_conductor'][0]
+                bit_conductor = twitch_id_to_name_cached(bit_conductor_id)
+
+                self.log_event("Hype Train Conductor. Sub conductor %s, Bit conductor %s", sub_conductor, bit_conductor)
+            elif type == 'cooldownover':
+                self.log_event('Hype Train Cooldown Over')
+            else:
+                # Not a recognized type
+                self.send_error(400)
+                return
         else:
             # Non-hype train event
-
-            
             adjust = 0
             points = 0
             points_set = False

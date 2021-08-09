@@ -417,6 +417,62 @@ SPDX-License-Identifier: Apache-2.0
         };
     </script>
 
+    <h1>Hype Train</h1>
+
+    <h3>Test the events</h3>
+    For reference: AnAnonymousGifter = 274598607 and AnAnonymousCheerer = 407665396
+
+    <br />
+    Start:
+    <input type="button" value="Start" id="hype_start_button" />
+
+    <br />
+    End:
+    Sub Conductor: <input type="text" value="274598607" id="hype_end_sub_conductor" />
+    Gift Conductor: <input type="text" value="407665396" id="hype_end_gift_conductor" />
+    <input type="button" value="End" id="hype_end_button" />
+    
+    <br />
+    Progress:
+    Level: <input type="number" value="1" id="hype_progress_level" />
+    Progress: <input type="number" value="100" id="hype_progress_progress" />
+    Total: <input type="number" value="1000" id="hype_progress_total" />
+    <input type="button" value="Progress" id="hype_progress_button" />
+
+    <br />
+    Conductor:
+    Sub Conductor: <input type="text" value="274598607" id="hype_conductor_sub_conductor" />
+    Gift Conductor: <input type="text" value="407665396" id="hype_conductor_gift_conductor" />
+    <input type="button" value="End" id="hype_conductor_button" />
+
+    <br />
+    Cooldown Over:
+    <input type="button" value="Over" id="hype_cooldown_button" />
+
+    <script>
+        document.getElementById("hype_start_button").onclick=async () =>{
+            jQuery.ajax('/event?train=start')
+        };
+        document.getElementById("hype_end_button").onclick=async () =>{
+            jQuery.ajax('/event?train=end&sub_conductor=' + document.getElementById("hype_end_sub_conductor").value
+            + '&bit_conductor=' + document.getElementById("hype_end_gift_conductor").value)
+        };
+
+        document.getElementById("hype_progress_button").onclick=async () =>{
+            jQuery.ajax('/event?train=progress&level=' + document.getElementById("hype_progress_level").value
+             + '&progress=' + document.getElementById("hype_progress_progress").value
+             + '&total=' + document.getElementById("hype_progress_total").value)
+        };
+
+
+        document.getElementById("hype_conductor_button").onclick=async () =>{
+            jQuery.ajax('/event?train=conductor&sub_conductor=' + document.getElementById("hype_conductor_sub_conductor").value + '&bit_conductor=' + document.getElementById("hype_conductor_gift_conductor").value)
+        };
+        document.getElementById("hype_cooldown_button").onclick=async () =>{
+            jQuery.ajax('/event?train=cooldownover')
+        };
+    </script>
+
     <h1>Events</h1>
 
     <textarea id="eventTextArea"></textarea>
