@@ -14,7 +14,7 @@ setup(
             'compressed': True,
         }
     },
-    data_files = [('.', ['config.json', 'config.json.license', 'control_panel.html', 'favicon.ico', 'README.md']),
+    data_files = [('.', ['config.json', 'config.json.license', 'control_panel.html', 'favicon.ico', 'favicon.ico.license', 'README.md']),
                   ('examples', ['examples/timer.html', 'examples/clock.png', 'examples/clock.png.license']),
                   ('LICENSES', ['LICENSES/CC0-1.0.txt', 'LICENSES/Apache-2.0.txt'])],
     console=['server.py']
