@@ -527,7 +527,7 @@ def setup_logging():
         interval=1,
         backupCount=10
     )
-    debug_formatter = logging.Formatter('%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s - %(message)s')
+    debug_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     debug_handler.setFormatter(debug_formatter)
     debug_handler.setLevel(logging.DEBUG)
 
