@@ -95,6 +95,10 @@ to obtain the data.
 Returns the contents of `timer_data.json`. This is the best way to obtain the current timer information.
 See [examples/timer.html](examples/timer.html) for how you might use this.
 
+### GET /api/resettimer
+Resets the contents of `timer_data.json` as if it were a non-existing file, or the program was restarted with that
+file containing stale data.
+
 ### GET /api/twitch/id_to_name
 For
     http://127.0.0.1:8001/api/twitch/id_to_name?id=number

@@ -101,6 +101,10 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(bytes(json.dumps(data, indent=4), "utf8"))
             return
+        elif url.path == '/api/resettimer':
+            reset_timer()
+            self.success_response()
+            return
         elif url.path == '/api/config':
             # Open timer_data.json
             with open('config.json') as f:
@@ -482,7 +486,10 @@ def ensureTimerSetup(config):
             if now <  timer_data['current-end']:
                 print("Since current time is before end in timer_data.json, assuming script restarted during stream")
                 return
+    reset_timer()
 
+def reset_timer():
+    global config
     # No existing timer data or expired
     timer_data = {}
     timer_data['stream-start'] = config['timer']['stream-start'].isoformat()

@@ -145,6 +145,18 @@ SPDX-License-Identifier: Apache-2.0
     </script>
 
     <h3>Modify the timer</h3>
+
+    <input type="button" id="timer_reset" value="Reset timer for new stream" />
+    <script>
+        document.getElementById("timer_reset").onclick=async () =>{
+            if (confirm("WARNING: This will destroy the current timer information. Are you sure?")) {
+                jQuery.ajax('/api/resettimer')
+            }
+        };
+    </script>
+
+    <br />
+    <br />
     Add:
     <br />
     Sub/Resub: 
