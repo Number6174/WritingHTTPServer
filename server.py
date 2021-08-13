@@ -94,6 +94,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             # Open timer_data.json
             with open('timer_data.json') as f:
                 data = json.load(f)
+                self.log_message("/api/timer: " + json.dumps(data))
                 self.send_response(200)
                 self.send_header("Content-type", "application/json")
                 self.send_header("Access-Control-Allow-Origin", "*")
