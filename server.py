@@ -531,7 +531,7 @@ def twitch_id_to_name_cached(id):
     return r.text
 
 def version_string():
-    return "0.0.6"
+    return "0.0.7"
 
 def setup_logging():
     import logging.handlers
