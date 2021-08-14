@@ -18,14 +18,10 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         logger.error(format%args)
         
     def log_message(self, format, *args):
-        global logger
-        logger.debug(format%args)
-
-    def log_event(self, format, *args):
-        global logger
-        logger.info(format%args)
+        pass
 
     def do_GET(self):
+        global logger
         # Handle the request
         url = urlparse(self.path)
         if url.path == '/':
@@ -36,18 +32,20 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif url.path.startswith('/api'):
             self.handle_api()
         elif url.path == '/event':
+            logger.debug('%s', url)
             self.handle_event()
         elif url.path =='/keypress':
+            logger.debug('%s', url)
             self.handle_keypress()
         elif url.path == '/write':
+            logger.debug('%s', url)
             self.handle_write()
-        elif url.path == '/timer':
-            self.handle_timer()
         else:
-            self.log_message("Ignoring request to " + self.path)
+            logger.debug("Ignoring request to " + self.path)
             self.send_error(404)
 
     def do_PUT(self):
+        global logger
         # Acquire the PUT data
         content_length = int(self.headers['Content-Length'])
         raw_data = self.rfile.read(content_length)
@@ -57,9 +55,9 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         if url.path == '/api/configwriter/timer_data':
             with open('timer_data.json', 'w') as f:
                 json.dump(data, f, indent=4)
-            self.log_message('Updated timer_data.json')
+            logger.debug('Updated timer_data.json')
         elif url.path == '/api/configwriter/config':
-            self.log_message("About to update config.json with %s", data)
+            logger.debug("About to update config.json with %s", data)
             with open('config.json', 'r') as f:
                 existing = json.load(f)
 
@@ -72,9 +70,8 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             # Reload config for rest of program
             global config
             config = readConfig('config.json')
-            self.log_message('Updated config.json')
         else:
-            self.log_message("Ignoring PUT to " + self.path)
+            logger.debug("Ignoring PUT to " + self.path)
             self.send_error(400)
             return
 
@@ -94,7 +91,6 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             # Open timer_data.json
             with open('timer_data.json') as f:
                 data = json.load(f)
-                self.log_message("/api/timer: " + json.dumps(data))
                 self.send_response(200)
                 self.send_header("Content-type", "application/json")
                 self.send_header("Access-Control-Allow-Origin", "*")
@@ -144,6 +140,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_error(400)
 
     def handle_event(self):
+        global logger
         # Extract query
         query = parse_qs(urlparse(self.path).query)
 
@@ -153,28 +150,28 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             # Some kind of hype train event
             type = query['train'][0]
             if type == 'start':
-                self.log_event('Hype Train Start')
+                logger.info('Hype Train Start')
             elif type == 'end':
                 sub_conductor_id = query['sub_conductor'][0]
                 sub_conductor = twitch_id_to_name_cached(sub_conductor_id)
                 bit_conductor_id = query['bit_conductor'][0]
                 bit_conductor = twitch_id_to_name_cached(bit_conductor_id)
 
-                self.log_event("Hype Train End. Sub conductor %s, Bit conductor %s", sub_conductor, bit_conductor)
+                logger.info("Hype Train End. Sub conductor %s, Bit conductor %s", sub_conductor, bit_conductor)
             elif type == 'progress':
                 level = query['level'][0]
                 progress = query['progress'][0]
                 total = query['total'][0]
-                self.log_event("Hype Train Progress: Level %s Progress %s Total %s", level, progress, total)
+                logger.info("Hype Train Progress: Level %s Progress %s Total %s", level, progress, total)
             elif type == 'conductor':
                 sub_conductor_id = query['sub_conductor'][0]
                 sub_conductor = twitch_id_to_name_cached(sub_conductor_id)
                 bit_conductor_id = query['bit_conductor'][0]
                 bit_conductor = twitch_id_to_name_cached(bit_conductor_id)
 
-                self.log_event("Hype Train Conductor. Sub conductor %s, Bit conductor %s", sub_conductor, bit_conductor)
+                logger.info("Hype Train Conductor. Sub conductor %s, Bit conductor %s", sub_conductor, bit_conductor)
             elif type == 'cooldownover':
-                self.log_event('Hype Train Cooldown Over')
+                logger.info('Hype Train Cooldown Over')
             else:
                 # Not a recognized type
                 self.send_error(400)
@@ -189,7 +186,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 amount = query['bits'][0]
                 points = int(config['event']['per100bits'] * int(amount) / 100)
                 message = query['message'][0]
-                self.log_event('\'' + name + '\' cheered ' + amount + ' bits (' + str(points) + ' points): ' + message)
+                logger.info('\'' + name + '\' cheered ' + amount + ' bits (' + str(points) + ' points): ' + message)
             elif 'sub' in query:
                 type = query['sub'][0]
                 if type == 'self':
@@ -208,13 +205,13 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                         points = int(config['event']['t1-sub'])
                     else:
                         # Invalid tier
-                        self.log_message('Have a self sub with a invalid tier')
+                        logger.debug('Have a self sub with a invalid tier')
                         self.send_error(400)
                         return
                     months = query['months'][0]
                     message = query['message'][0]
 
-                    self.log_event('\'' + name + '\' subbed ' + tier + ' for ' + months + ' months (' + str(points) + ' points): ' + message)
+                    logger.info('\'' + name + '\' subbed ' + tier + ' for ' + months + ' months (' + str(points) + ' points): ' + message)
                 elif type == 'gift':
                     gifter = query['gifter'][0]
                     recipient = query['recipient'][0]
@@ -230,12 +227,12 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                         points = int(config['event']['t1-sub'])
                     else:
                         # Invalid tier
-                        self.log_message('Have a gift sub with a invalid tier')
+                        logger.debug('Have a gift sub with a invalid tier')
                         self.send_error(400)
                         return
                     months = query['months'][0]
 
-                    self.log_event('\'' + gifter + '\' gifted ' + tier + ' to \'' + recipient + '\' who now has ' + months + ' months (' + str(points) + ' points)')
+                    logger.info('\'' + gifter + '\' gifted ' + tier + ' to \'' + recipient + '\' who now has ' + months + ' months (' + str(points) + ' points)')
 
                 elif type == 'community':
                     name = query['name'][0]
@@ -252,15 +249,15 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                         points = int(config['event']['t1-sub']) * quantity
                     else:
                         # Invalid tier
-                        self.log_message('Have a community gift sub with a invalid tier')
+                        logger.debug('Have a community gift sub with a invalid tier')
                         self.send_error(400)
                         return
 
-                    self.log_event('\'' + name + '\' gifted ' + tier + ' to ' + str(quantity) + ' people (' + str(points) + ' points)')
+                    logger.info('\'' + name + '\' gifted ' + tier + ' to ' + str(quantity) + ' people (' + str(points) + ' points)')
 
                     pass
                 else:
-                    self.log_error('Have a sub with invalid type, skipping')
+                    logger.debug('Have a sub with invalid type, skipping')
                     self.send_error(400)
                     return
 
@@ -270,7 +267,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 amount_after_fees = amount * (1.0 - config['event']['tip-fee-percent'] / 100) - config['event']['tip-fee-fixed']
                 points = int(config['event']['perdollartip'] * amount_after_fees)
                 message = query['message'][0]
-                self.log_event('\'' + name + '\' tipped ' + str(amount) + ' (' + str(points) + ' points): ' + message)
+                logger.info('\'' + name + '\' tipped ' + str(amount) + ' (' + str(points) + ' points): ' + message)
             elif 'time' in query:
                 direction = 0
                 if query['time'][0] == 'increase':
@@ -279,11 +276,11 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                     direction = -1
                 else:
                     #Invalid
-                    self.log_message('Event time with invalid value')
+                    logger.debug('Event time with invalid value')
                     self.send_response(400)
                     return
                 if 'amount' not in query:
-                    self.log_message('No amount specified')
+                    logger.debug('No amount specified')
                     self.send_response(400)
                     return
 
@@ -291,7 +288,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 amount = (parse(query['amount'][0]) - today_no_time).total_seconds()
 
                 adjust = int(direction * amount)
-                self.log_event('Adjust timer by ' + str(adjust) + ' seconds')
+                logger.info('Adjust timer by ' + str(adjust) + ' seconds')
 
             elif 'points' in query:
                 direction = 0
@@ -304,20 +301,20 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                     points_set = True
                 else:
                     #Invalid
-                    self.log_message('Event points with invalid value')
+                    logger.debug('Event points with invalid value')
                     self.send_response(400)
                     return
 
                 if 'amount' not in query:
-                    self.log_message('Points even with no amount')
+                    logger.debug('Points even with no amount')
                     self.send_response(400)
                     return
 
                 points = direction * int(query['amount'][0])
                 if points_set:
-                    self.log_event('Set timer to ' + str(points) + ' points')
+                    logger.info('Set timer to ' + str(points) + ' points')
                 else:
-                    self.log_event('Adjust timer by ' + str(points) + ' points')
+                    logger.info('Adjust timer by ' + str(points) + ' points')
 
 
             # Read in timer info
@@ -346,12 +343,15 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             # Convert back to ISO Format and write out
             timer_data['current-end'] = current_end.isoformat(timespec='milliseconds')
 
+            logger.debug('Timer info is now ' + json.dumps(timer_data))
+
             with open('timer_data.json', 'w') as f:
                 json.dump(timer_data, f, indent=4)
         
         self.success_response()
 
     def handle_keypress(self):
+        global logger
         from pynput.keyboard import Key
         # Extract query
         query = parse_qs(urlparse(self.path).query)
@@ -385,7 +385,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif keystring in key_map:
             key = key_map[keystring]
         else:
-            self.log_message("Unknown key: %s", keystring)
+            logger.debug("Unknown key: %s", keystring)
             self.send_error(400)
             return
 
@@ -397,7 +397,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         if 'delay' in query and repeat != 1:
             delay = int(query['delay'][0]) / 1000
 
-        self.log_message("Pressing key %s with modifiers %s and repeat of %i and delay %i", key, modifiers, repeat, delay)
+        logger.debug("Pressing key %s with modifiers %s and repeat of %i and delay %i", key, modifiers, repeat, delay)
 
         x = threading.Thread(target=keypressWorker, args=(modifiers, key, repeat, delay))
         x.start()
@@ -405,16 +405,17 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.success_response()
 
     def handle_write(self):
+        global logger
         # Extract query
         query = parse_qs(urlparse(self.path).query)
 
         # Require both filename and data
         if not 'filename' in query:
-            self.log_message("Missing query parameter filename")
+            logger.debug("Missing query parameter filename")
             self.send_error(404)
             return
         if not 'data' in query:
-            self.log_message("Missing query parameter data")
+            logger.debug("Missing query parameter data")
             self.send_error(404)
             return
 
@@ -424,7 +425,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             if query['mode'][0] == 'a':
                 mode = 'a'
             elif query['mode'][0] != 'w':
-                self.log_message("Unknown mode parameter '" + query['mode'][0] + "'")
+                logger.debug("Unknown mode parameter '" + query['mode'][0] + "'")
                 self.send_error(404)
                 return
 
@@ -440,9 +441,9 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             w.write(data)
 
         if mode == 'w':
-            self.log_message("'" + filename + "' was overwritten with '" + data + "'")
+            logger.debug("'" + filename + "' was overwritten with '" + data + "'")
         elif mode == 'a':
-            self.log_message("'" + filename + "' was appended with '" + data + "'")
+            logger.debug("'" + filename + "' was appended with '" + data + "'")
 
         self.success_response()
 
@@ -524,6 +525,9 @@ def twitch_id_to_name_cached(id):
 
     twitch_id_cache[id] = r.text
 
+    global logger
+    logger.debug ('Convert id %s to %s', id, r.text)
+
     return r.text
 
 def version_string():
@@ -558,15 +562,15 @@ def setup_logging():
     event_handler.setLevel(logging.INFO)
 
     # Attach handlers
-    global logger
     logger = logging.getLogger('root')
     logger.setLevel(logging.DEBUG)
     logger.addHandler(debug_handler)
     logger.addHandler(event_handler)
-
+    return logger
 
 def startServer():
-    setup_logging()
+    global logger
+    logger = setup_logging()
     global config
     config = readConfig('config.json')
     ensureTimerSetup(config)
