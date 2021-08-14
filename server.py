@@ -203,6 +203,9 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                         points = int(config['event']['t2-sub'])
                     elif tier == 'Tier 3':
                         points = int(config['event']['t3-sub'])
+                    elif tier == 'Tier NaN':
+                        # Not really valid, but KC send it, so assuming it is actually Tier 1
+                        points = int(config['event']['t1-sub'])
                     else:
                         # Invalid tier
                         self.log_message('Have a self sub with a invalid tier')
@@ -222,6 +225,9 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                         points = int(config['event']['t2-sub'])
                     elif tier == 'Tier 3':
                         points = int(config['event']['t3-sub'])
+                    elif tier == 'Tier NaN':
+                        # Not really valid, but KC send it, so assuming it is actually Tier 1
+                        points = int(config['event']['t1-sub'])
                     else:
                         # Invalid tier
                         self.log_message('Have a gift sub with a invalid tier')
@@ -241,6 +247,9 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                         points = int(config['event']['t2-sub']) * quantity
                     elif tier == 'Tier 3':
                         points = int(config['event']['t3-sub']) * quantity
+                    elif tier == 'Tier NaN':
+                        # Not really valid, but KC send it, so assuming it is actually Tier 1
+                        points = int(config['event']['t1-sub']) * quantity
                     else:
                         # Invalid tier
                         self.log_message('Have a community gift sub with a invalid tier')
