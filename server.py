@@ -194,11 +194,11 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                     tier = query['tier'][0]
                     if tier == 'Prime':
                         points = int(config['event']['prime-sub'])
-                    elif tier == 'Tier 1':
+                    elif tier == 'Tier 1' or tier == '1000':
                         points = int(config['event']['t1-sub'])
-                    elif tier == 'Tier 2':
+                    elif tier == 'Tier 2' or tier == '2000':
                         points = int(config['event']['t2-sub'])
-                    elif tier == 'Tier 3':
+                    elif tier == 'Tier 3' or tier == '3000':
                         points = int(config['event']['t3-sub'])
                     elif tier == 'Tier NaN':
                         # Not really valid, but KC send it, so assuming it is actually Tier 1
@@ -216,11 +216,11 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                     gifter = query['gifter'][0]
                     recipient = query['recipient'][0]
                     tier = query['tier'][0]
-                    if tier == 'Tier 1':
+                    if tier == 'Tier 1' or tier == '1000':
                         points = int(config['event']['t1-sub'])
-                    elif tier == 'Tier 2':
+                    elif tier == 'Tier 2' or tier == '2000':
                         points = int(config['event']['t2-sub'])
-                    elif tier == 'Tier 3':
+                    elif tier == 'Tier 3' or tier == '3000':
                         points = int(config['event']['t3-sub'])
                     elif tier == 'Tier NaN':
                         # Not really valid, but KC send it, so assuming it is actually Tier 1
@@ -238,11 +238,11 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                     name = query['name'][0]
                     quantity =  int(query['quantity'][0])
                     tier = query['tier'][0]
-                    if tier == 'Tier 1':
+                    if tier == 'Tier 1' or tier == '1000':
                         points = int(config['event']['t1-sub']) * quantity
-                    elif tier == 'Tier 2':
+                    elif tier == 'Tier 2' or tier == '2000':
                         points = int(config['event']['t2-sub']) * quantity
-                    elif tier == 'Tier 3':
+                    elif tier == 'Tier 3' or tier == '3000':
                         points = int(config['event']['t3-sub']) * quantity
                     elif tier == 'Tier NaN':
                         # Not really valid, but KC send it, so assuming it is actually Tier 1
