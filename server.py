@@ -86,6 +86,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(bytes(body, "utf8"))
 
     def handle_api(self):
+        global logger
         url = urlparse(self.path)
         if url.path == '/api/timer':
             # Open timer_data.json
@@ -99,6 +100,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             return
         elif url.path == '/api/resettimer':
             reset_timer()
+            logger.info("Manual timer reset via /api/resettimer")
             self.success_response()
             return
         elif url.path == '/api/config':
@@ -136,7 +138,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(bytes(version_string(), "utf8"))
             return
-        self.log_message('Unknown API call ' + url.path)
+        logger.error('Unknown API call ' + url.path)
         self.send_error(400)
 
     def handle_event(self):
@@ -582,6 +584,8 @@ def startServer():
     print("WritingHTTPServer " + version_string() + " by Number6174")
     print("Server started on http://" + config['host'] + ":" + str(config['port']))
     print("Use CTRL+C to stop")
+
+    logger.info('Server startup. Version ' + version_string() + ' listening on ' + config['host'] + ':' + str(config['port']))
 
     # Setup server
     handler = WritingHttpRequestHandler
