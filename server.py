@@ -334,7 +334,9 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             stream_end = datetime.datetime.fromisoformat(timer_data['stream-end'])
             percent_funded = timer_data['points-funded'] / timer_data['points-to-fully-fund']
             time_adjust = datetime.timedelta(seconds=timer_data['time-adjust'])
-            current_end = stream_start + percent_funded * config['timer']['time-fundable'] + time_adjust
+            timer_start = datetime.timedelta(seconds=timer_data['timer-start'])
+            time_fundable = datetime.timedelta(seconds=timer_data['time-fundable'])
+            current_end = stream_start + timer_start + percent_funded * time_fundable + time_adjust
 
             # Do not exceed stream end
             if current_end > stream_end:
@@ -508,6 +510,8 @@ def reset_timer():
     timer_data['points-funded'] = 0
     timer_data['points-to-fully-fund'] = config['timer']['points-to-fully-fund']
     timer_data['time-adjust'] = 0
+    timer_data['timer-start'] = config['timer']['timer-start'].total_seconds()
+    timer_data['time-fundable'] = config['timer']['time-fundable'].total_seconds()
 
     with open('timer_data.json', 'w') as f:
         json.dump(timer_data, f, indent=4)

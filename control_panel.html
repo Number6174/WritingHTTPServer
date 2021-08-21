@@ -326,9 +326,13 @@ SPDX-License-Identifier: Apache-2.0
     <br />
     Stream could extend until: <input type="datetime-local" id="timer_stream_end_datetime" />
     <br />
-    Current End: <input type="datetime-local" id="timer_stream_current_end_datetime" />
+    Current End: <input type="datetime-local" id="timer_stream_current_end_datetime" readonly="true" /> (read only)
     <br />
     Points funded <input type="number" id="timer_points_funded" /> out of <input type="number" id="timer_points_to_fully_fund" />
+    <br />
+    Timer starts with <input type="number" id="timer_start" /> seconds to start
+    <br />
+    Max duration of stream is <input type="number" id="timer_time_fundable" readonly="true" /> seconds (read only)
     <br />
     Time adjustment <input type="number" id="timer_time_adjust" /> seconds (can be negative value)
 
@@ -366,6 +370,8 @@ SPDX-License-Identifier: Apache-2.0
                 document.getElementById("timer_stream_current_end_datetime").value = data['current-end']
                 document.getElementById("timer_points_funded").value = data['points-funded']
                 document.getElementById("timer_points_to_fully_fund").value = data['points-to-fully-fund']
+                document.getElementById("timer_start").value = data['timer-start']
+                document.getElementById("timer_time_fundable").value = data['time-fundable']
                 document.getElementById("timer_time_adjust").value = data['time-adjust']
             })
         }
