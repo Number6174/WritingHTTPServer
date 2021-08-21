@@ -132,6 +132,7 @@ If you are using Kruiz Control, this would be triggered by one of `OnSETwitchBit
 Where
 * `username` should be the display name of the sub
 * `t` is the tier and must be one of "Prime", "Tier 1", "Tier 2", "Tier 3", "1000", "2000", or "3000".
+  If it is not one of these, it is treated as "Tier 1".
 * `amount` is an integer
 * `msg` is a string along the message.
 
@@ -144,6 +145,7 @@ Where
 * `username1` should be the display name of the gifter
 * `username2` should be the display name of the recipient
 * `t` is the tier and must be one of "Tier 1", "Tier 2", "Tier 3", "1000", "2000", "3000".
+  If it is not one of these, it is treated as "Tier 1".
 * `amount` is an integer
 
 If you are using Kruiz Control, this would be triggered by `OnSETwitchGiftSub`, `OnSLTwitchGiftSub` `OnSLTwitchGiftSubNoSync`.
@@ -155,6 +157,7 @@ Where
 * `username` should be the display name of the gifter
 * `amount` is an integer
 * `t` is the tier and must be one of "Tier 1", "Tier 2", "Tier 3", "1000", "2000", "3000".
+  If it is not one of these, it is treated as "Tier 1".
 
 If you are using Kruiz Control, this would be triggered by `OnSETwitchBulkGiftSub`, `OnSLTwitchCommunityGiftSub` `OnSLTwitchCommunityGiftSubNoSync`
 

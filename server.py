@@ -202,14 +202,11 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                         points = int(config['event']['t2-sub'])
                     elif tier == 'Tier 3' or tier == '3000':
                         points = int(config['event']['t3-sub'])
-                    elif tier == 'Tier NaN':
-                        # Not really valid, but KC send it, so assuming it is actually Tier 1
-                        points = int(config['event']['t1-sub'])
                     else:
-                        # Invalid tier
-                        logger.debug('Have a self sub with a invalid tier')
-                        self.send_error(400)
-                        return
+                        # Invalid tier, assuming Tier 1
+                        points = int(config['event']['t1-sub'])
+                        logger.debug('Have a self sub with a invalid tier' + str(query))
+                        logger.info('Invalid tier of ' + tier + ' treating it as Tier 1')
                     months = query['months'][0]
                     message = query['message'][0]
 
@@ -224,14 +221,11 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                         points = int(config['event']['t2-sub'])
                     elif tier == 'Tier 3' or tier == '3000':
                         points = int(config['event']['t3-sub'])
-                    elif tier == 'Tier NaN':
-                        # Not really valid, but KC send it, so assuming it is actually Tier 1
-                        points = int(config['event']['t1-sub'])
                     else:
-                        # Invalid tier
-                        logger.debug('Have a gift sub with a invalid tier')
-                        self.send_error(400)
-                        return
+                        # Invalid tier, assuming Tier 1
+                        points = int(config['event']['t1-sub'])
+                        logger.debug('Have a gift sub with a invalid tier' + str(query))
+                        logger.info('Invalid tier of ' + tier + ' treating it as Tier 1')
                     months = query['months'][0]
 
                     logger.info('\'' + gifter + '\' gifted ' + tier + ' to \'' + recipient + '\' who now has ' + months + ' months (' + str(points) + ' points)')
@@ -246,14 +240,11 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                         points = int(config['event']['t2-sub']) * quantity
                     elif tier == 'Tier 3' or tier == '3000':
                         points = int(config['event']['t3-sub']) * quantity
-                    elif tier == 'Tier NaN':
-                        # Not really valid, but KC send it, so assuming it is actually Tier 1
-                        points = int(config['event']['t1-sub']) * quantity
                     else:
-                        # Invalid tier
-                        logger.debug('Have a community gift sub with a invalid tier')
-                        self.send_error(400)
-                        return
+                        # Invalid tier, assuming Tier 1
+                        points = int(config['event']['t1-sub']) * quantity
+                        logger.debug('Have a community gift sub with a invalid tier' + str(query))
+                        logger.info('Invalid tier of ' + tier + ' treating it as Tier 1')
 
                     logger.info('\'' + name + '\' gifted ' + tier + ' to ' + str(quantity) + ' people (' + str(points) + ' points)')
 
