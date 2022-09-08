@@ -99,19 +99,6 @@ See [examples/timer.html](examples/timer.html) for how you might use this.
 Resets the contents of `timer_data.json` as if it were a non-existing file, or the program was restarted with that
 file containing stale data.
 
-### GET /api/twitch/id_to_name
-For
-    http://127.0.0.1:8001/api/twitch/id_to_name?id=number
-
-Calls out to [AidenWallis' Customapi](https://customapi.aidenwallis.co.uk/) to convert a Twitch ID into a
-name. This endpoint caches the result in memory and should be used over using AidenWallis' server directly.
-It will be faster in any case that the cached value is used and it is more polite to Aiden's server.
-
-The parameter number is almost certainly an integer, but Twitch doesn't document this, so treat it as a string.
-
-Since the cache is in memory, the lifetime of the cache is the program's lifetime. So, to invalidate the cache
-simply restart the program.
-
 ## GET /event
 
 This endpoint records various events. It is recommended you call this endpoint for each bit, sub, and tip.
