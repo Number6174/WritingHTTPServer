@@ -7,6 +7,7 @@ from urllib.parse import parse_qs
 import datetime
 import json
 import logging
+import subprocess
 from dateutil.parser import parse
 import pynput
 import threading
@@ -40,6 +41,12 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif url.path == '/write':
             logger.debug('%s', url)
             self.handle_write()
+        elif url.path == '/rewasd_select_slot':
+            logger.debug('%s', url)
+            self.handle_rewasd_select_slot()
+        elif url.path == '/rewasd_apply_config':
+            logger.debug('%s', url)
+            self.handle_rewasd_apply_config()
         else:
             logger.debug("Ignoring request to " + self.path)
             self.send_error(404)
@@ -399,6 +406,75 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         self.success_response()
 
+    def handle_rewasd_select_slot(self):
+        global logger
+        # Extract query
+        query = parse_qs(urlparse(self.path).query)
+
+        # Determine device to set
+        if 'device_id' not in query:
+            self.log_message("Requested rewasd_select_slot with no device_id")
+            self.send_error(400)
+            return
+        device_id = str(query['device_id'][0])
+
+        # Determine slot to set
+        if 'slot' not in query:
+            self.log_message("Requested rewasd_select_slot with no slot")
+            self.send_error(400)
+            return
+        slot = str(query['slot'][0])
+
+        delay = 0
+        slot2 = ""
+        if 'delay' in query:
+            delay = int(query['delay'][0]) / 1000
+            # Determine slot to return
+            if 'slot2' not in query:
+                self.log_message("Requested rewasd_select_slot with delay but no slot2")
+                self.send_error(400)
+                return
+            slot2 = str(query['slot2'][0])
+            logger.debug("Setting reWASD device %s to %s and then to %s after a delay of %i", device_id, slot, slot2, delay)
+        else:
+            logger.debug("Setting reWASD device %s to %s", device_id, slot)
+
+        x = threading.Thread(target=rewasdSelectSlotWorker, args=(device_id, slot, slot2, delay))
+        x.start()
+
+        self.success_response()
+
+    def handle_rewasd_apply_config(self):
+        global logger
+        # Extract query
+        query = parse_qs(urlparse(self.path).query)
+
+        # Determine device to set
+        if 'device_id' not in query:
+            self.log_message("Requested rewasd_apply with no device_id")
+            self.send_error(400)
+            return
+        device_id = query['device_id'][0]
+
+        # Determine slot to set
+        if 'path' not in query:
+            self.log_message("Requested rewasd_apply with no path")
+            self.send_error(400)
+            return
+        path = query['path'][0]
+
+        # Determine slot to set
+        if 'slot' not in query:
+            self.log_message("Requested rewasd_apply with no slot")
+            self.send_error(400)
+            return
+        slot = query['slot'][0]
+
+        x = threading.Thread(target=rewasdApplyConfigWorker, args=(device_id, path, slot))
+        x.start()
+
+        self.success_response()
+
     def handle_write(self):
         global logger
         # Extract query
@@ -459,6 +535,25 @@ def keypressWorker(modifiers, key, repeat, delay):
 
         time.sleep(delay)
         
+def rewasdSelectSlotWorker(device_id:str, slot:str, slot2:str, delay:int):
+        # Set reWASD to slot1
+        cmd = "C:/Program Files/reWASD/reWASDCommandLine.exe select_slot --id \"" + device_id + "\" --slot " + slot
+        
+        subprocess.run(cmd)
+        if(delay > 0):
+            time.sleep(delay)
+
+        # Set reWASD to slot2
+        if(slot2 != ""):
+            cmd = "C:/Program Files/reWASD/reWASDCommandLine.exe select_slot --id \"" + device_id + "\" --slot " + slot2
+            subprocess.run(cmd)
+
+def rewasdApplyConfigWorker(device_id:str, path:str, slot:str):
+        # Set reWASD to slot1
+        cmd = "C:/Program Files/reWASD/reWASDCommandLine.exe apply --id \"" + device_id + "\" --path \"" + path + "\" --slot " + slot
+        subprocess.run(cmd, 
+                         stdout=subprocess.PIPE, 
+                         universal_newlines=True)
 
 def readConfig(filename):
     with open(filename) as f:
