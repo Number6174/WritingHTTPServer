@@ -16,5 +16,8 @@
         "points-to-fully-fund": 10000
     },
     "host": "127.0.0.1",
-    "port": 8001
+    "port": 8001,
+    "rewasd": {
+        "path": "C:/Program Files/reWASD/reWASDCommandLine.exe"
+    }
 }

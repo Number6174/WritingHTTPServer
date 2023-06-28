@@ -7,6 +7,7 @@ from urllib.parse import parse_qs
 import datetime
 import json
 import logging
+import os
 import subprocess
 from dateutil.parser import parse
 import pynput
@@ -536,24 +537,48 @@ def keypressWorker(modifiers, key, repeat, delay):
         time.sleep(delay)
         
 def rewasdSelectSlotWorker(device_id:str, slot:str, slot2:str, delay:int):
-        # Set reWASD to slot1
-        cmd = "C:/Program Files/reWASD/reWASDCommandLine.exe select_slot --id \"" + device_id + "\" --slot " + slot
+        rewasdPath = config['rewasd']['path']
+        if not os.path.isfile(rewasdPath) or not str.endswith(rewasdPath, "reWASDCommandLine.exe"):
+            logger.error("rewasdPath must target the reWASDCommandLine.exe file")
+            return
         
-        subprocess.run(cmd)
+        # Set reWASD to slot1
+        cmd = rewasdPath + " select_slot --id \"" + device_id + "\" --slot " + slot
+        logger.info("Running command: "+cmd)
+        response = subprocess.run(cmd, capture_output=True, text=True).stdout
+        if(response):
+            logger.error(response)
+            return
+        else:
+            logger.info("success")
+
         if(delay > 0):
             time.sleep(delay)
 
         # Set reWASD to slot2
         if(slot2 != ""):
-            cmd = "C:/Program Files/reWASD/reWASDCommandLine.exe select_slot --id \"" + device_id + "\" --slot " + slot2
-            subprocess.run(cmd)
+            cmd = rewasdPath + " select_slot --id \"" + device_id + "\" --slot " + slot2
+            logger.info("Running command: "+cmd)
+            response = subprocess.run(cmd, capture_output=True, text=True).stdout
+            if(response):
+                logger.error(response)
+            else:
+                logger.info("success")
 
 def rewasdApplyConfigWorker(device_id:str, path:str, slot:str):
+        rewasdPath = config['rewasd']['path']
+        if not os.path.isfile(rewasdPath) or not str.endswith(rewasdPath, "reWASDCommandLine.exe"):
+            logger.error("rewasdPath must target the reWASDCommandLine.exe file")
+            return
+        
         # Set reWASD to slot1
-        cmd = "C:/Program Files/reWASD/reWASDCommandLine.exe apply --id \"" + device_id + "\" --path \"" + path + "\" --slot " + slot
-        subprocess.run(cmd, 
-                         stdout=subprocess.PIPE, 
-                         universal_newlines=True)
+        cmd = rewasdPath + " apply --id \"" + device_id + "\" --path \"" + path + "\" --slot " + slot
+        logger.info("Running command: "+cmd)
+        response = subprocess.run(cmd, capture_output=True, text=True).stdout
+        if(response):
+            logger.error(response)
+        else:
+            logger.info("success")
 
 def readConfig(filename):
     with open(filename) as f:
@@ -667,6 +692,17 @@ def startServer():
     config = readConfig('config.json')
     ensureTimerSetup(config)
  
+    if "rewasd" in config and "path" in config['rewasd']:
+        rewasdPath = config['rewasd']['path']
+        if not os.path.isfile(rewasdPath) or not str.endswith(rewasdPath, "reWASDCommandLine.exe"):
+            print("rewasdPath must target the reWASDCommandLine.exe file itself. Falling back to default install location.")
+            config['rewasd']['path'] = "C:/Program Files/reWASD/reWASDCommandLine.exe"
+        else:
+            print("reWASDCommandLine.exe found at path: "+ rewasdPath)
+    else:
+        print("rewasdPath not found in loaded config. falling back to default install location.")
+        config['rewasd']['path'] = "C:/Program Files/reWASD/reWASDCommandLine.exe"             
+
     print("WritingHTTPServer " + version_string() + " by Number6174")
     print("Server started on http://" + config['host'] + ":" + str(config['port']))
     print("Use CTRL+C to stop")
