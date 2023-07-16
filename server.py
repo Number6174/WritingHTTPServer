@@ -121,18 +121,6 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(bytes(f.read(), 'utf-8'))
             return
-        elif url.path == '/api/twitch/id_to_name':
-            query = parse_qs(urlparse(self.path).query)
-            if 'id' not in query:
-                self.send_error(400)
-                return
-            response = twitch_id_to_name_cached(query['id'][0])
-            self.send_response(200)
-            self.send_header("Content-type", "text/plain")
-            self.send_header("Access-Control-Allow-Origin", "*")
-            self.end_headers()
-            self.wfile.write(bytes(response, "utf8"))
-            return
         elif url.path == '/api/version':
             self.send_response(200)
             self.send_header("Content-type", "application/json")
@@ -155,24 +143,26 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             if type == 'start':
                 logger.info('Hype Train Start')
             elif type == 'end':
-                sub_conductor_id = query['sub_conductor'][0]
-                sub_conductor = twitch_id_to_name_cached(sub_conductor_id)
-                bit_conductor_id = query['bit_conductor'][0]
-                bit_conductor = twitch_id_to_name_cached(bit_conductor_id)
+                pass
+                #sub_conductor_id = query['sub_conductor'][0]
+                #sub_conductor = twitch_id_to_name_cached(sub_conductor_id)
+                #bit_conductor_id = query['bit_conductor'][0]
+                #bit_conductor = twitch_id_to_name_cached(bit_conductor_id)
 
-                logger.info("Hype Train End. Sub conductor %s, Bit conductor %s", sub_conductor, bit_conductor)
+                #logger.info("Hype Train End. Sub conductor %s, Bit conductor %s", sub_conductor, bit_conductor)
             elif type == 'progress':
                 level = query['level'][0]
                 progress = query['progress'][0]
                 total = query['total'][0]
                 logger.info("Hype Train Progress: Level %s Progress %s Total %s", level, progress, total)
             elif type == 'conductor':
-                sub_conductor_id = query['sub_conductor'][0]
-                sub_conductor = twitch_id_to_name_cached(sub_conductor_id)
-                bit_conductor_id = query['bit_conductor'][0]
-                bit_conductor = twitch_id_to_name_cached(bit_conductor_id)
+                pass
+                #sub_conductor_id = query['sub_conductor'][0]
+                #sub_conductor = twitch_id_to_name_cached(sub_conductor_id)
+                #bit_conductor_id = query['bit_conductor'][0]
+                #bit_conductor = twitch_id_to_name_cached(bit_conductor_id)
 
-                logger.info("Hype Train Conductor. Sub conductor %s, Bit conductor %s", sub_conductor, bit_conductor)
+                #logger.info("Hype Train Conductor. Sub conductor %s, Bit conductor %s", sub_conductor, bit_conductor)
             elif type == 'cooldownover':
                 logger.info('Hype Train Cooldown Over')
             else:
@@ -510,23 +500,6 @@ def reset_timer():
     with open('timer_data.json', 'w') as f:
         json.dump(timer_data, f, indent=4)
 
-twitch_id_cache = {}
-def twitch_id_to_name_cached(id):
-    global twitch_id_cache
-
-    # Check if already cached
-    if id in twitch_id_cache:
-        return twitch_id_cache[id]
-    
-    import requests
-    r = requests.get('https://customapi.aidenwallis.co.uk/api/v1/twitch/toName/' + id)
-
-    twitch_id_cache[id] = r.text
-
-    global logger
-    logger.debug ('Convert id %s to %s', id, r.text)
-
-    return r.text
 
 def version_string():
     return "0.0.9"
