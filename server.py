@@ -81,6 +81,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         # Write response
         self.send_response(200)
         self.send_header("Content-type", "text/plain")
+        self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
         body = f"Success"
         self.wfile.write(bytes(body, "utf8"))
