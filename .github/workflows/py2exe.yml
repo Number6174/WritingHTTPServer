@@ -25,7 +25,7 @@ jobs:
         pip install -r requirements.txt
     - name: py2exe freeze
       run: |
-        python setup.py py2exe
+        python freeze.py
     - name: Zip Files
       run: |
         7z a -tzip WritingHTTPServer.zip ./dist/*
