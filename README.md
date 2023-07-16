@@ -258,6 +258,6 @@ It would result in the file `filename.txt` containing something like:
 # Notes
 If you intend to build an exe using py2exe, you must first install `py2exe` via pip, then run:
 
-    python setup.py py2exe
+    python freeze.py
 
 For support file Github issues or join the [Discord](https://discord.gg/MpN36Fnpf2).
