@@ -512,9 +512,21 @@ SPDX-License-Identifier: Apache-2.0
                 url: '/api/events',
                 dataType: 'text'
             })
-            .done(function (data) {
-                $('#eventTextArea').val(data);
-            })
+                .done(function (data) {
+                    let ta = $('#eventTextArea')
+                    ta.val(data);
+                    let str = ta[0].value;
+                    if (str) {
+                        let cols = 0;
+                        let lines = str.split("\n");
+                        lines.forEach(l => {
+                            if (l.length > cols)
+                                cols = l.length;
+                        });
+                        ta[0].rows = lines.length + 1 > 50? 50 : lines.length + 1;
+                        ta[0].cols = cols + 1;
+                    }
+                })
         }
     </script>
 
