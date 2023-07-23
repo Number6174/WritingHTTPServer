@@ -7,6 +7,8 @@ from urllib.parse import parse_qs
 import datetime
 import json
 import logging
+import os
+import subprocess
 from dateutil.parser import parse
 import pynput
 import threading
@@ -40,6 +42,12 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif url.path == '/write':
             logger.debug('%s', url)
             self.handle_write()
+        elif url.path == '/rewasd_select_slot':
+            logger.debug('%s', url)
+            self.handle_rewasd_select_slot()
+        elif url.path == '/rewasd_apply_config':
+            logger.debug('%s', url)
+            self.handle_rewasd_apply_config()
         else:
             logger.debug("Ignoring request to " + self.path)
             self.send_error(404)
@@ -390,6 +398,75 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         self.success_response()
 
+    def handle_rewasd_select_slot(self):
+        global logger
+        # Extract query
+        query = parse_qs(urlparse(self.path).query)
+
+        # Determine device to set
+        if 'device_id' not in query:
+            self.log_message("Requested rewasd_select_slot with no device_id")
+            self.send_error(400)
+            return
+        device_id = str(query['device_id'][0])
+
+        # Determine slot to set
+        if 'slot' not in query:
+            self.log_message("Requested rewasd_select_slot with no slot")
+            self.send_error(400)
+            return
+        slot = str(query['slot'][0])
+
+        delay = 0
+        slot2 = ""
+        if 'delay' in query:
+            delay = int(query['delay'][0]) / 1000
+            # Determine slot to return
+            if 'slot2' not in query:
+                self.log_message("Requested rewasd_select_slot with delay but no slot2")
+                self.send_error(400)
+                return
+            slot2 = str(query['slot2'][0])
+            logger.debug("Setting reWASD device %s to %s and then to %s after a delay of %i", device_id, slot, slot2, delay)
+        else:
+            logger.debug("Setting reWASD device %s to %s", device_id, slot)
+
+        x = threading.Thread(target=rewasdSelectSlotWorker, args=(device_id, slot, slot2, delay))
+        x.start()
+
+        self.success_response()
+
+    def handle_rewasd_apply_config(self):
+        global logger
+        # Extract query
+        query = parse_qs(urlparse(self.path).query)
+
+        # Determine device to set
+        if 'device_id' not in query:
+            self.log_message("Requested rewasd_apply with no device_id")
+            self.send_error(400)
+            return
+        device_id = query['device_id'][0]
+
+        # Determine slot to set
+        if 'path' not in query:
+            self.log_message("Requested rewasd_apply with no path")
+            self.send_error(400)
+            return
+        path = query['path'][0]
+
+        # Determine slot to set
+        if 'slot' not in query:
+            self.log_message("Requested rewasd_apply with no slot")
+            self.send_error(400)
+            return
+        slot = query['slot'][0]
+
+        x = threading.Thread(target=rewasdApplyConfigWorker, args=(device_id, path, slot))
+        x.start()
+
+        self.success_response()
+
     def handle_write(self):
         global logger
         # Extract query
@@ -450,6 +527,49 @@ def keypressWorker(modifiers, key, repeat, delay):
 
         time.sleep(delay)
         
+def rewasdSelectSlotWorker(device_id:str, slot:str, slot2:str, delay:int):
+        rewasdPath = config['rewasd']['path']
+        if not os.path.isfile(rewasdPath) or not str.endswith(rewasdPath, "reWASDCommandLine.exe"):
+            logger.error("rewasdPath must target the reWASDCommandLine.exe file")
+            return
+        
+        # Set reWASD to slot1
+        cmd = rewasdPath + " select_slot --id \"" + device_id + "\" --slot " + slot
+        logger.info("Running command: "+cmd)
+        response = subprocess.run(cmd, capture_output=True, text=True).stdout
+        if(response):
+            logger.error(response)
+            return
+        else:
+            logger.info("success")
+
+        if(delay > 0):
+            time.sleep(delay)
+
+        # Set reWASD to slot2
+        if(slot2 != ""):
+            cmd = rewasdPath + " select_slot --id \"" + device_id + "\" --slot " + slot2
+            logger.info("Running command: "+cmd)
+            response = subprocess.run(cmd, capture_output=True, text=True).stdout
+            if(response):
+                logger.error(response)
+            else:
+                logger.info("success")
+
+def rewasdApplyConfigWorker(device_id:str, path:str, slot:str):
+        rewasdPath = config['rewasd']['path']
+        if not os.path.isfile(rewasdPath) or not str.endswith(rewasdPath, "reWASDCommandLine.exe"):
+            logger.error("rewasdPath must target the reWASDCommandLine.exe file")
+            return
+        
+        # Set reWASD to slot1
+        cmd = rewasdPath + " apply --id \"" + device_id + "\" --path \"" + path + "\" --slot " + slot
+        logger.info("Running command: "+cmd)
+        response = subprocess.run(cmd, capture_output=True, text=True).stdout
+        if(response):
+            logger.error(response)
+        else:
+            logger.info("success")
 
 def readConfig(filename):
     with open(filename) as f:
@@ -546,6 +666,17 @@ def startServer():
     config = readConfig('config.json')
     ensureTimerSetup(config)
  
+    if "rewasd" in config and "path" in config['rewasd']:
+        rewasdPath = config['rewasd']['path']
+        if not os.path.isfile(rewasdPath) or not str.endswith(rewasdPath, "reWASDCommandLine.exe"):
+            print("rewasdPath must target the reWASDCommandLine.exe file itself. Falling back to default install location.")
+            config['rewasd']['path'] = "C:/Program Files/reWASD/reWASDCommandLine.exe"
+        else:
+            print("reWASDCommandLine.exe found at path: "+ rewasdPath)
+    else:
+        print("rewasdPath not found in loaded config. falling back to default install location.")
+        config['rewasd']['path'] = "C:/Program Files/reWASD/reWASDCommandLine.exe"             
+
     print("WritingHTTPServer " + version_string() + " by Number6174")
     print("Server started on http://" + config['host'] + ":" + str(config['port']))
     print("Use CTRL+C to stop")
