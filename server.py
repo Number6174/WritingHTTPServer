@@ -328,6 +328,41 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                     + " points): "
                     + message
                 )
+            elif "hype_chat" in query:
+                name = query["name"][0]
+                amount = float(query["hype_chat"][0]) / (
+                    10 ** int(query["exponent"][0])
+                )
+                global currency_conversion
+                currency_rate = float(
+                    currency_conversion[config["event"]["hype-chat-currency"].lower()][
+                        query["currency"][0].lower()
+                    ]
+                )
+                converted_amount = amount / currency_rate
+
+                amount_after_fees = converted_amount * (
+                    1.0 - config["event"]["hype-chat-fee-percent"] / 100
+                )
+
+                points = int(config["event"]["perdollarhypechat"] * amount_after_fees)
+                message = query["message"][0]
+                logger.info(
+                    "'"
+                    + name
+                    + "' hype chatted "
+                    + str(amount)
+                    + " "
+                    + query["currency"][0].lower()
+                    + " = "
+                    + str(converted_amount)
+                    + " "
+                    + config["event"]["hype-chat-currency"].lower()
+                    + " ("
+                    + str(points)
+                    + " points): "
+                    + message
+                )
             elif "time" in query:
                 direction = 0
                 if query["time"][0] == "increase":
@@ -811,6 +846,48 @@ def setup_logging():
     return logger
 
 
+def get_currency_conversion(config):
+    import httpx
+
+    base_currency = config["event"]["hype-chat-currency"].lower()
+
+    mirrors = [
+        f"https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{base_currency}.min.json",
+        f"https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{base_currency}.json",
+        f"https://raw.githubusercontent.com/fawazahmed0/currency-api/1/latest/currencies/{base_currency}.min.json",
+        f"https://raw.githubusercontent.com/fawazahmed0/currency-api/1/latest/currencies/{base_currency}.json",
+    ]
+    # Timeout controls how many seconds to wait before first byte of
+    # response. This is not limiting the total connection time if it
+    # longer
+    timeout = 1
+
+    for url in mirrors:
+        try:
+            # Initiate request
+            logging.debug(f"Connecting to {url}")
+            r = httpx.get(url, timeout=timeout)
+
+            # Ensure it went well
+            r.raise_for_status()
+
+            # Success
+            logging.info(f"Retrieved currency data from {url}")
+            return json.loads(r.text)
+        except httpx.RequestError as exc:
+            logging.error(f"An error occurred while requesting {exc.request.url!r}.")
+        except httpx.HTTPStatusError as exc:
+            logging.error(
+                f"Error response {exc.response.status_code} while requesting {exc.request.url!r}."
+            )
+
+    logging.critical("Unable to download currency conversion from anywhere. Aborting")
+    print("Unable to download currency conversion from anywhere. Aborting")
+    import sys
+
+    sys.exit(1)
+
+
 def startServer():
     global logger
     logger = setup_logging()
@@ -834,6 +911,9 @@ def startServer():
             "rewasdPath not found in loaded config. falling back to default install location."
         )
         config["rewasd"]["path"] = "C:/Program Files/reWASD/reWASDCommandLine.exe"
+
+    global currency_conversion
+    currency_conversion = get_currency_conversion(config)
 
     print("WritingHTTPServer " + version_string() + " by Number6174")
     print("Server started on http://" + config["host"] + ":" + str(config["port"]))

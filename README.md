@@ -70,6 +70,11 @@ Under `event`, you'll find:
 
 * `per100bits` - How many points per 100 bits cheered, e.g. `100`
 * `perdollartip` - How many points per 1 dollar in tips, e.g. `100`
+* `tip-fee-percent` - What percent of a tip is paid as a fee, e.g. `2.9`
+* `tip-fee-fixed` - What fixed cost of a tip is paid as a fee, e.g. `0.3`
+* `perdollarhypechat` - How many points per dollar of Hype Chat, e.g. `100`
+* `hype-chat-currency` - Currency to convert Hype Chats too, e.g. `usd`. Make sure to use the [ISO 4217 currency code](https://en.wikipedia.org/wiki/ISO_4217#List_of_ISO_4217_currency_codes) in lower case.
+* `hype-chat-fee-percent` - What percent of a Hype Chat paid as a fee, e.g. `33.5`
 * `prime-sub` - How many points per Prime sub, e.g. `250`
 * `t1-sub` - How many points per Tier 1 sub, e.g. `250`
 * `t2-sub` - How many points per Tier 2 sub, e.g. `500`
@@ -158,6 +163,27 @@ Where
 * `msg` is a string of the message.
 
 If you are using Kruiz Control, this would be triggered by `OnSEDonation`, `OnSLDonation`, `OnSLDonationNoSync`, `OnSLTiltifyDonation`, `OnSLTiltifyDonationNoSync`, or similar
+
+### Hype Chat
+    http://127.0.0.1:8001/event?name=username&hype_chat=amount&currency=currency_code&exponent=exp&message=msg
+
+Where
+* `username` should be the display name of the Hype Chatter
+* `amount` is a number
+* `currency_code` is an [ISO 4217 currency code](https://en.wikipedia.org/wiki/ISO_4217#List_of_ISO_4217_currency_codes)
+* `exp` indicates how many decimal points this currency represents partial amounts in. For example, USD uses 2
+* `msg` is a string of the message
+
+Right now Twitch does not provide a nice API for Hype Chats. So if you are using Kruiz Control, you can use this workaround:
+
+```
+OnEveryChatMessage
+Function 'var d = [data]; return {is_hype_chat: "pinned-chat-paid-amount" in d.extra.userState}'
+if 1 {is_hype_chat} = false
+exit
+Function 'var d = [data]; return {hc_amount: d.extra.userState["pinned-chat-paid-amount"], hc_currency: d.extra.userState["pinned-chat-paid-currency"], hc_exponent: d.extra.userState["pinned-chat-paid-exponent"]}'
+API GET http://127.0.0.1:8001/event?name={user}&hype_chat={hc_amount}&currency={hc_currency}&exponent={hc_exponent}&message={message}
+```
 
 ### Hype train
 If you wish to use Hype Train information, use the following
