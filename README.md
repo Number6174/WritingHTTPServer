@@ -5,7 +5,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # WritingHTTPServer
 A simple Python HTTP server that writes to files, simulates keypresses, records events, manages a timer,
-and manages information about a hype train.
+and manages information about a hype train. It is intended to be used with [Kruiz Control](https://github.com/Kruiser8/Kruiz-Control/tree/master).
 
 **WARNING**: This is a very purpose driven program. If you don't completely understand how to use it, it could
 expose you to security vulnerabilities. Do not open this program to the broader internet. Only allow it to
@@ -31,7 +31,10 @@ The provided configuration has it listen only on 127.0.0.1. It is not recommende
 3. Ensure the following Python packages are installed. You may wish to do this in a [venv](https://docs.python.org/3/tutorial/venv.html). Each can be installed as `pip install` or just use `pip install -r requirements.txt`
     * python-dateutil
     * pynput
-    * requests
+    * httpx
+If you wish to develop the program further, also include
+    * black
+    * pyinstaller
 
 # Use
 
@@ -86,6 +89,10 @@ Under `timer`, you'll find:
 * `timer-start` - How much to start the timer with prior to any bits/subs/tips, e.g. `3h`
 * `time-fundable` - How long the timer can be extended, e.g. `9h`
 * `points-to-fully-fund` - How many points from events need to occur to fully fund
+
+User `rewasd`, you'll find:
+
+* `path` - Where to find the reWASDCommandLine exectuable, e.g. `C:/Program Files/reWASD/reWASDCommandLine.exe` 
 
 # Endpoints
 This program provides several endpoint accessible over HTTP. The endpoints that are documented here are the only
@@ -155,7 +162,7 @@ If you are using Kruiz Control, this would be triggered by `OnSETwitchBulkGiftSu
 
 
 ### Tips
-    http://127.0.0.1:8001/event?name=username&tip=amount&message=message
+    http://127.0.0.1:8001/event?name=username&tip=amount&message=msg
 
 Where
 * `username` should be the display name of the tipper
@@ -281,9 +288,11 @@ It would result in the file `filename.txt` containing something like:
     2021-04-08T09:37:20.769127 - 1
     2021-04-08T09:37:21.799855 - 2
 
-# Notes
+# Development Notes
 If you intend to build an exe using py2exe, you must first install `py2exe` via pip, then run:
 
     python freeze.py
 
 For support file Github issues or join the [Discord](https://discord.gg/MpN36Fnpf2).
+
+The code is formatted with [Black](https://black.readthedocs.io/) and linted with [ruff](https://github.com/astral-sh/ruff).
