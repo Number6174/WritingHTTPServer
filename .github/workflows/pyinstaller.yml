@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2021 Number6174
 # SPDX-License-Identifier: CC0-1.0
 
-name: py2exe
+name: pyinstaller
 
 on:
   push:
@@ -23,12 +23,12 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: py2exe freeze
+    - name: pyinstaller freeze
       run: |
-        python freeze.py
+        pyinstaller server.psec
     - name: Zip Files
       run: |
-        7z a -tzip WritingHTTPServer.zip ./dist/*
+        7z a -tzip WritingHTTPServer.zip ./dist/server/*
     - name: Create release
       uses: softprops/action-gh-release@v1
       with:
