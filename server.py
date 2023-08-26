@@ -1,18 +1,24 @@
 # SPDX-FileCopyrightText: 2021 Number6174
 # SPDX-License-Identifier: Apache-2.0
 
-import http.server
-from urllib.parse import urlparse
-from urllib.parse import parse_qs
 import datetime
+import http.server
 import json
 import logging
+import logging.handlers
 import os
+import os.path
 import subprocess
-from dateutil.parser import parse
-import pynput
+import sys
 import threading
 import time
+from urllib.parse import parse_qs
+from urllib.parse import urlparse
+
+import httpx
+import pynput
+from dateutil.parser import parse
+from pynput.keyboard import Key
 
 
 class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
@@ -457,7 +463,6 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def handle_keypress(self):
         global logger
-        from pynput.keyboard import Key
 
         # Extract query
         query = parse_qs(urlparse(self.path).query)
@@ -765,8 +770,6 @@ def readConfig(filename):
 
 
 def ensureTimerSetup(config):
-    import os.path
-
     if os.path.exists("timer_data.json"):
         with open("timer_data.json") as f:
             timer_data = json.load(f)
@@ -813,11 +816,7 @@ def version_string():
 
 
 def setup_logging():
-    import logging.handlers
-
     # Ensure there is a logs directory
-    import os
-
     os.makedirs("logs", exist_ok=True)
 
     # Setup a rotating debug log
@@ -847,8 +846,6 @@ def setup_logging():
 
 
 def get_currency_conversion(config):
-    import httpx
-
     base_currency = config["event"]["hype-chat-currency"].lower()
 
     mirrors = [
@@ -883,7 +880,6 @@ def get_currency_conversion(config):
 
     logging.critical("Unable to download currency conversion from anywhere. Aborting")
     print("Unable to download currency conversion from anywhere. Aborting")
-    import sys
 
     sys.exit(1)
 
