@@ -290,9 +290,9 @@ It would result in the file `filename.txt` containing something like:
     2021-04-08T09:37:21.799855 - 2
 
 # Development Notes
-If you intend to build an exe using py2exe, you must first install `py2exe` via pip, then run:
+If you intend to build an exe using pyinstaller, you must first install `pyinstaller` via pip, then run:
 
-    python freeze.py
+    pyinstaller server.spec
 
 For support file Github issues or join the [Discord](https://discord.gg/MpN36Fnpf2).
 
