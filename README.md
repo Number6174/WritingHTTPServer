@@ -32,7 +32,8 @@ The provided configuration has it listen only on 127.0.0.1. It is not recommende
     * python-dateutil
     * pynput
     * httpx
-If you wish to develop the program further, also include
+
+   If you wish to develop the program further, also include
     * black
     * pyinstaller
 
@@ -90,7 +91,7 @@ Under `timer`, you'll find:
 * `time-fundable` - How long the timer can be extended, e.g. `9h`
 * `points-to-fully-fund` - How many points from events need to occur to fully fund
 
-User `rewasd`, you'll find:
+Under `rewasd`, you'll find:
 
 * `path` - Where to find the reWASDCommandLine exectuable, e.g. `C:/Program Files/reWASD/reWASDCommandLine.exe` 
 
