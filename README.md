@@ -182,6 +182,8 @@ Where
 * `exp` indicates how many decimal points this currency represents partial amounts in. For example, USD uses 2
 * `msg` is a string of the message
 
+Currency conversion uses [this API](https://github.com/fawazahmed0/currency-api). The current day's rates are cached upon script startup.
+
 Right now Twitch does not provide a nice API for Hype Chats. So if you are using Kruiz Control, you can use this workaround:
 
 ```
