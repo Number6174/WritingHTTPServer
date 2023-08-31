@@ -49,12 +49,12 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif url.path == "/write":
             logger.debug("%s", url)
             self.handle_write()
+        elif url.path == "/rewasd":
+            logger.debug("%s", url)
+            self.handle_rewasd()
         elif url.path == "/rewasd_select_slot":
             logger.debug("%s", url)
             self.handle_rewasd_select_slot()
-        elif url.path == "/rewasd_apply_config":
-            logger.debug("%s", url)
-            self.handle_rewasd_apply_config()
         else:
             logger.debug("Ignoring request to " + self.path)
             self.send_error(404)
@@ -547,6 +547,42 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         self.success_response()
 
+    def handle_rewasd(self):
+        global logger
+
+        # Extract query
+        query = parse_qs(urlparse(self.path).query)
+
+        # Determine device to set
+        if "device_id" not in query:
+            self.log_message("Requested rewasd with no device_id")
+            self.send_error(400)
+            return
+        device_id = str(query["device_id"][0])
+
+        if "apply" in query:
+            # Apply a config
+            # Determine slot to set
+            if "apply" not in query:
+                self.log_message("Requested rewasd with no apply path")
+                self.send_error(400)
+                return
+            apply_path = query["apply"][0]
+
+            # Determine slot to set
+            if "slot" not in query:
+                self.log_message("Requested rewasd with no slot")
+                self.send_error(400)
+                return
+            slot = query["slot"][0]
+
+            x = threading.Thread(
+                target=rewasdApplyConfigWorker, args=(device_id, apply_path, slot)
+            )
+            x.start()
+
+            self.success_response()
+
     def handle_rewasd_select_slot(self):
         global logger
         # Extract query
@@ -588,39 +624,6 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         x = threading.Thread(
             target=rewasdSelectSlotWorker, args=(device_id, slot, slot2, delay)
-        )
-        x.start()
-
-        self.success_response()
-
-    def handle_rewasd_apply_config(self):
-        global logger
-        # Extract query
-        query = parse_qs(urlparse(self.path).query)
-
-        # Determine device to set
-        if "device_id" not in query:
-            self.log_message("Requested rewasd_apply with no device_id")
-            self.send_error(400)
-            return
-        device_id = query["device_id"][0]
-
-        # Determine slot to set
-        if "path" not in query:
-            self.log_message("Requested rewasd_apply with no path")
-            self.send_error(400)
-            return
-        path = query["path"][0]
-
-        # Determine slot to set
-        if "slot" not in query:
-            self.log_message("Requested rewasd_apply with no slot")
-            self.send_error(400)
-            return
-        slot = query["slot"][0]
-
-        x = threading.Thread(
-            target=rewasdApplyConfigWorker, args=(device_id, path, slot)
         )
         x.start()
 
@@ -728,7 +731,7 @@ def rewasdApplyConfigWorker(device_id: str, path: str, slot: str):
         logger.error("rewasdPath must target the reWASDCommandLine.exe file")
         return
 
-    # Set reWASD to slot1
+    # Set reWASD to slot
     cmd = (
         rewasdPath
         + ' apply --id "'

@@ -260,6 +260,32 @@ This example takes `Ctrl-F13` and sends the key `b` to an application with the w
 
 This kind of workaround is often useful to send a specific keystroke to a program that is not the active program.
 
+## GET /rewasd
+
+This endpoint interacts with the program [reWASD](https://www.rewasd.com/) using their [command line interface](https://help.rewasd.com/interface/command-line.html).
+
+Each of the variations will require a device-id. From reWASD's documentation:
+> To find it, please choose the device or the group you are working with in reWASD GUI, right-click to open the
+> context menu and choose Copy device ID option.
+
+You might need some of reWASD's "Advanced Features" which requires more than a basic license. The program will print
+an error message if you don't have the correct license.
+
+### Apply a config
+
+For URLs of the form:
+
+    http://127.0.0.1:8001/rewasd?device_id=XYZ&apply=path&slot=slotX
+
+Where
+* `device_id` is the device id to modify
+* `apply` is the path of the config to apply, including extension. To find where your config is stored, right-click a
+   certain config and choose Open file location option; then copy the path, and add the name of the config file to it,
+   along with the file extension
+* `slot` is the slot to apply it too. Must be one of `slot1`, `slot2`, `slot3`, `slot4`.
+
+### Select Slots
+
 ## GET /write
 
 For URLs of the form:
