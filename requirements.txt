@@ -13,7 +13,7 @@ packaging==23.1
 pathspec==0.11.2
 pefile==2023.2.7
 platformdirs==3.10.0
-pyinstaller==5.13.0
+pyinstaller==5.13.2
 pyinstaller-hooks-contrib==2023.7
 pynput==1.7.6
 python-dateutil==2.8.2
