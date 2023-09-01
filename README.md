@@ -104,6 +104,19 @@ This provides REST style information. These are here to simplify using some of t
 script. It permits an HTML file to not care where a file is present on a hard drive and need only know the URL
 to obtain the data.
 
+### GET /api/currency
+For URLs of the form:
+
+    http://127.0.0.1:8001/api/currency?amount=X&exponent=Y&currency=Z
+
+Where
+* `amount` is the amount to convert
+* `exponent` if present, how many decimal points to shift amount by
+* `currency` is an [ISO 4217 currency code](https://en.wikipedia.org/wiki/ISO_4217#List_of_ISO_4217_currency_codes)
+
+Performs a currency conversion using [this API](https://github.com/fawazahmed0/currency-api).
+Returns just a string of the converted amount
+
 ### GET /api/timer
 Returns the contents of `timer_data.json`. This is the best way to obtain the current timer information.
 See [examples/timer.html](examples/timer.html) for how you might use this.

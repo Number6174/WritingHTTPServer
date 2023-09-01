@@ -13,7 +13,6 @@ import subprocess
 import sys
 import threading
 import time
-from typing import NamedTuple
 from urllib.parse import parse_qs
 from urllib.parse import urlparse
 
@@ -103,7 +102,23 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
     def handle_api(self):
         global logger
         url = urlparse(self.path)
-        if url.path == "/api/timer":
+        if url.path == "/api/currency":
+            query = parse_qs(urlparse(self.path).query)
+
+            amount = float(query["amount"][0])
+            exponent = 0
+            if "exponent" in query:
+                exponent = int(query["exponent"][0])
+
+            code = query["currency"][0]
+            converted = convert_currency(amount, exponent, code)
+            self.send_response(200)
+            self.send_header("Content-type", "text/plain")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(bytes(str(converted), "utf-8"))
+            return
+        elif url.path == "/api/timer":
             # Open timer_data.json
             with open("timer_data.json") as f:
                 data = json.load(f)
@@ -335,16 +350,16 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 )
             elif "hype_chat" in query:
                 name = query["name"][0]
+
                 amount = float(query["hype_chat"][0]) / (
                     10 ** int(query["exponent"][0])
                 )
-                global currency_conversion
-                currency_rate = float(
-                    currency_conversion[config["event"]["hype-chat-currency"].lower()][
-                        query["currency"][0].lower()
-                    ]
+
+                converted_amount = convert_currency(
+                    float(query["hype_chat"][0]),
+                    int(query["exponent"][0]),
+                    query["currency"][0].lower(),
                 )
-                converted_amount = amount / currency_rate
 
                 amount_after_fees = converted_amount * (
                     1.0 - config["event"]["hype-chat-fee-percent"] / 100
@@ -843,6 +858,17 @@ rewasd_event = threading.Event()
 rewasd_in_progress_start = None
 rewasd_thread = threading.Thread(target=rewasd_timer_thread, args=())
 rewasd_thread.start()
+
+
+def convert_currency(amount: float, exp: int, currency_code: str):
+    amount = amount / (10**exp)
+    global currency_conversion
+    currency_rate = float(
+        currency_conversion[config["event"]["hype-chat-currency"].lower()][
+            currency_code
+        ]
+    )
+    return amount / currency_rate
 
 
 def readConfig(filename):
