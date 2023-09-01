@@ -12,6 +12,7 @@ added_files = [
     ("control_panel.html", "."),
     ("favicon.ico", "."),
     ("favicon.ico.license", "."),
+    ("examples/*", "examples"),
 ]
 
 a = Analysis(
