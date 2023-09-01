@@ -853,7 +853,7 @@ def rewasd_queue_to_json():
             timespec="milliseconds"
         )
 
-    result["events"] = [[x.name, x.duration] for x in rewasd_queue]
+    result["events"] = [{"name": x.name, "duration": x.duration} for x in rewasd_queue]
 
     return JSONEncoder(indent=4).encode(result)
 
