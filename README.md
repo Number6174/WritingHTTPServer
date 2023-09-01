@@ -284,7 +284,24 @@ Where
    along with the file extension
 * `slot` is the slot to apply it too. Must be one of `slot1`, `slot2`, `slot3`, `slot4`.
 
-### Select Slots
+### Activate a slot
+
+For URLs of the form:
+
+    http://127.0.0.1:8001/rewasd?device_id=XYZ&name=Foo&duration=number&change_to=slotX&return_to=slotY
+
+Where
+* `device_id` is the device id to modify
+* `name` is the queue to add time too 
+* `duration` is the number of seconds to apply the swap
+* `change_to` is the slot to change the device too. Must be one of `slot1`, `slot2`, `slot3`, `slot4`.
+* `return_to` is the slot to change to after the duration has elapsed
+
+This will change the `device_id` to the `change_to` slot and when complete, change it to the `return_to` slot.
+
+This internally uses a timer system so only one change is active at any moment. The events will queue up. The "same"
+event will coalesce together. Two events are considered the same if they have the same `device_id`, `name`, `change_to`,
+and `return_to`.
 
 ## GET /write
 

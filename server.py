@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2021 Number6174
 # SPDX-License-Identifier: Apache-2.0
 
+from dataclasses import dataclass
 import datetime
 import http.server
 import json
@@ -12,6 +13,7 @@ import subprocess
 import sys
 import threading
 import time
+from typing import NamedTuple
 from urllib.parse import parse_qs
 from urllib.parse import urlparse
 
@@ -52,9 +54,6 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif url.path == "/rewasd":
             logger.debug("%s", url)
             self.handle_rewasd()
-        elif url.path == "/rewasd_select_slot":
-            logger.debug("%s", url)
-            self.handle_rewasd_select_slot()
         else:
             logger.debug("Ignoring request to " + self.path)
             self.send_error(404)
@@ -562,7 +561,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         if "apply" in query:
             # Apply a config
-            # Determine slot to set
+            # Determine path to config file
             if "apply" not in query:
                 self.log_message("Requested rewasd with no apply path")
                 self.send_error(400)
@@ -575,6 +574,10 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_error(400)
                 return
             slot = query["slot"][0]
+            if slot not in ["slot1", "slot2", "slot3", "slot4"]:
+                self.log_message("Invalid rewasd slot")
+                self.send_error(400)
+                return
 
             x = threading.Thread(
                 target=rewasdApplyConfigWorker, args=(device_id, apply_path, slot)
@@ -582,52 +585,44 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             x.start()
 
             self.success_response()
-
-    def handle_rewasd_select_slot(self):
-        global logger
-        # Extract query
-        query = parse_qs(urlparse(self.path).query)
-
-        # Determine device to set
-        if "device_id" not in query:
-            self.log_message("Requested rewasd_select_slot with no device_id")
-            self.send_error(400)
             return
-        device_id = str(query["device_id"][0])
+        elif "name" in query:
+            # Slot swapping
+            name = query["name"][0]
 
-        # Determine slot to set
-        if "slot" not in query:
-            self.log_message("Requested rewasd_select_slot with no slot")
-            self.send_error(400)
-            return
-        slot = str(query["slot"][0])
-
-        delay = 0
-        slot2 = ""
-        if "delay" in query:
-            delay = int(query["delay"][0]) / 1000
-            # Determine slot to return
-            if "slot2" not in query:
-                self.log_message("Requested rewasd_select_slot with delay but no slot2")
+            if "duration" not in query:
+                self.log_message("Requested rewasd with no duration")
                 self.send_error(400)
                 return
-            slot2 = str(query["slot2"][0])
-            logger.debug(
-                "Setting reWASD device %s to %s and then to %s after a delay of %i",
-                device_id,
-                slot,
-                slot2,
-                delay,
-            )
-        else:
-            logger.debug("Setting reWASD device %s to %s", device_id, slot)
+            duration = int(query["duration"][0])
 
-        x = threading.Thread(
-            target=rewasdSelectSlotWorker, args=(device_id, slot, slot2, delay)
-        )
-        x.start()
+            if "change_to" not in query:
+                self.log_message("Requested rewasd with no change_to")
+                self.send_error(400)
+                return
+            change_to = query["change_to"][0]
+            if change_to not in ["slot1", "slot2", "slot3", "slot4"]:
+                self.log_message("Invalid rewasd change_to slot")
+                self.send_error(400)
+                return
 
-        self.success_response()
+            if "return_to" not in query:
+                self.log_message("Requested rewasd with no return_to")
+                self.send_error(400)
+                return
+            return_to = query["return_to"][0]
+            if return_to not in ["slot1", "slot2", "slot3", "slot4"]:
+                self.log_message("Invalid rewasd return_to slot")
+                self.send_error(400)
+                return
+
+            rewasd_add_to_queue(device_id, name, duration, change_to, return_to)
+
+            self.success_response()
+            return
+
+        logger.error("Unknown reWASD call " + str(query))
+        self.send_error(400)
 
     def handle_write(self):
         global logger
@@ -691,7 +686,7 @@ def keypressWorker(modifiers, key, repeat, delay):
         time.sleep(delay)
 
 
-def rewasdSelectSlotWorker(device_id: str, slot: str, slot2: str, delay: int):
+def rewasd_select_slot_worker(device_id: str, slot: str):
     rewasdPath = config["rewasd"]["path"]
     if not os.path.isfile(rewasdPath) or not str.endswith(
         rewasdPath, "reWASDCommandLine.exe"
@@ -699,7 +694,7 @@ def rewasdSelectSlotWorker(device_id: str, slot: str, slot2: str, delay: int):
         logger.error("rewasdPath must target the reWASDCommandLine.exe file")
         return
 
-    # Set reWASD to slot1
+    # Set reWASD to slot
     cmd = rewasdPath + ' select_slot --id "' + device_id + '" --slot ' + slot
     logger.info("Running command: " + cmd)
     response = subprocess.run(cmd, capture_output=True, text=True).stdout
@@ -708,19 +703,6 @@ def rewasdSelectSlotWorker(device_id: str, slot: str, slot2: str, delay: int):
         return
     else:
         logger.info("success")
-
-    if delay > 0:
-        time.sleep(delay)
-
-    # Set reWASD to slot2
-    if slot2 != "":
-        cmd = rewasdPath + ' select_slot --id "' + device_id + '" --slot ' + slot2
-        logger.info("Running command: " + cmd)
-        response = subprocess.run(cmd, capture_output=True, text=True).stdout
-        if response:
-            logger.error(response)
-        else:
-            logger.info("success")
 
 
 def rewasdApplyConfigWorker(device_id: str, path: str, slot: str):
@@ -747,6 +729,124 @@ def rewasdApplyConfigWorker(device_id: str, path: str, slot: str):
         logger.error(response)
     else:
         logger.info("success")
+
+
+def rewasd_add_to_queue(
+    device_id: str, name: str, duration: int, change_to: str, return_to: str
+):
+    # Acquire queue lock
+    with rewasd_lock:
+        new_event = ReWASDTimerElement(device_id, name, change_to, return_to, duration)
+        # Check if merge-able
+        for i in rewasd_queue:
+            if i == new_event:
+                # Merge
+                i.duration += new_event.duration
+                new_event = None
+                break
+        # Insert new item if needed
+        if new_event is not None:
+            rewasd_queue.append(new_event)
+
+    # Notify processing thread
+    rewasd_event.set()
+
+
+def rewasd_timer_thread():
+    global rewasd_in_progress_start
+    while True:
+        # Ensure there is an item to process, if not wait until there is
+        rewasd_lock.acquire()
+        if len(rewasd_queue) == 0:
+            rewasd_lock.release()
+            rewasd_event.wait()
+            rewasd_event.clear()
+            continue
+
+        logging.debug(f"reWASD Queue: length {len(rewasd_queue)} is {rewasd_queue}")
+        now = datetime.datetime.now()
+        if rewasd_in_progress_start is None:
+            # Fresh event
+            logging.debug(f"Call reWASD, turn on slot {rewasd_queue[0].change_to}")
+            x = threading.Thread(
+                target=rewasd_select_slot_worker,
+                args=(rewasd_queue[0].device_id, rewasd_queue[0].change_to),
+            )
+            x.start()
+
+            # Store current time
+            rewasd_in_progress_start = now
+            # Sleep for event duration
+            logging.debug(f"About to sleep for {rewasd_queue[0].duration} seconds")
+            rewasd_lock.release()
+            time.sleep(rewasd_queue[0].duration)
+            continue
+
+        # Event in progress
+        in_progress_duration = (now - rewasd_in_progress_start).total_seconds()
+        if in_progress_duration < rewasd_queue[0].duration:
+            # Re-sleep, duration not over
+            resleep_time = rewasd_queue[0].duration - in_progress_duration
+            logging.debug(f"Re-sleep for {resleep_time}")
+            rewasd_lock.release()
+            time.sleep(resleep_time)
+            continue
+
+        # Finish event
+        if len(rewasd_queue) > 1:
+            # Move straight to next event in queue
+            rewasd_queue.pop(0)
+            logging.debug(
+                f"Call reWASD change to new event {rewasd_queue[0].change_to}"
+            )
+            x = threading.Thread(
+                target=rewasd_select_slot_worker,
+                args=(rewasd_queue[0].device_id, rewasd_queue[0].change_to),
+            )
+            x.start()
+
+            rewasd_in_progress_start = now
+            # Sleep for event duration
+            logging.debug(f"About to sleep for {rewasd_queue[0].duration} seconds")
+            rewasd_lock.release()
+            time.sleep(rewasd_queue[0].duration)
+            continue
+
+        # Queue will now be empty, go to return_to
+        logging.debug(f"Call reWASD to return too {rewasd_queue[0].return_to}")
+        x = threading.Thread(
+            target=rewasd_select_slot_worker,
+            args=(rewasd_queue[0].device_id, rewasd_queue[0].return_to),
+        )
+        x.start()
+        rewasd_queue.pop(0)
+        rewasd_lock.release()
+        rewasd_in_progress_start = None
+
+
+@dataclass
+class ReWASDTimerElement:
+    device_id: str
+    name: str
+    change_to: str
+    return_to: str
+    duration: int
+
+    def __eq__(self, other):
+        return (self.device_id, self.name, self.change_to, self.return_to) == (
+            other.device_id,
+            other.name,
+            other.change_to,
+            other.return_to,
+        )
+
+
+rewasd_queue = list()
+rewasd_lock = threading.Lock()
+rewasd_event = threading.Event()
+rewasd_in_progress_start = None
+rewasd_thread = threading.Thread(target=rewasd_timer_thread, args=())
+rewasd_thread.start()
 
 
 def readConfig(filename):
