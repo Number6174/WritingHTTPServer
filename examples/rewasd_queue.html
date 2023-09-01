@@ -1,0 +1,121 @@
+<!--
+SPDX-FileCopyrightText: 2023 Number6174
+SPDX-License-Identifier: Apache-2.0
+-->
+
+
+<!--
+    Notes for customizing this example:
+
+    See https://github.com/murtazajoo/Toaster-ui for documentation of the toast library used
+
+    In the function formatToastExtended, stylize the toast box contents. It accepts HTML
+    Change toast_options near the bottom for general colors
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ReWASD Queue</title>
+    <style>
+        .toaster-ui-lib-close {
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/toaster-ui@1.1.5/dist/main.js"></script>
+
+
+<script>
+    function formatMinSec(total_seconds) {
+        const seconds = Math.floor(total_seconds % 60);
+        const minutes = Math.floor(total_seconds / 60);
+        return minutes + ":" + (1e15 + seconds + '').slice(-2);
+    }
+
+    function formatToast(input) {
+        return formatToastExtended(input.name, input.duration)
+    }
+    function formatToastExtended(name, time) {
+        return name + " " + formatMinSec(time)
+    }
+
+    function updateDisplay() {
+        if (data["current_start"] == null) {
+            for (let i = 0; i < notifications.length; ++i) {
+                let toast = toaster.toastMap.get(notifications[i].id)
+                toast.close();
+            }
+            notifications = []
+            toaster.toastMap.clear()
+            return;
+        }
+
+        let new_notifications = [];
+        for (let i = 0, j = 0; i < data.events.length; ++i, ++j) {
+            // Advance j until names match or end of notifications
+            while (j < notifications.length && notifications[j].name !== data.events[i].name) {
+                toaster.toastMap.get(notifications[j].id).close()
+                toaster.toastMap.delete(notifications[j].id)
+                ++j;
+            }
+            if (j < notifications.length) {
+                // Check if update needed
+                let e = notifications[j];
+                if (e.duration !== data.events[i].duration) {
+                    e.duration = data.events[i].duration;
+                    // Should be just
+                    // toaster.updateToast(e.id, formatToast(e), "default", toast_options);
+                    // but that annoying logs to the console, instead do what it does
+                    let toast = toaster.toastMap.get(e.id)
+                    toast.update(formatToast(e), "default", toast_options, toast);
+                }
+                new_notifications.push(e);
+            } else {
+                // New event
+                let e = data.events[i];
+                e.id = toaster.addToast(formatToast(e), "default", toast_options);
+                new_notifications.push(e);
+            }
+        }
+        notifications = new_notifications;
+
+        // Update text of current event
+        const total = (Date.parse(data["current_start"]) - Date.parse(new Date())) / 1000 + notifications[0].duration;
+        let toast = toaster.toastMap.get(notifications[0].id)
+        toast.update(formatToastExtended(notifications[0].name, total), "default", toast_options, toast);
+        //console.log("Total is now " + total)
+    }
+
+    async function updateFromServer() {
+        const response = await fetch("http://127.0.0.1:8001/api/rewasd_queue");
+        data = await response.json();
+    }
+
+    async function update() {
+        await updateFromServer();
+        updateDisplay();
+    }
+
+    let data = {};
+    let notifications = [];
+    const toaster = new ToasterUi();
+    const toast_options = {
+        autoClose: false,
+        allowHtml: true,
+        styles: {
+            backgroundColor: '#ff0000',
+            color: '#ffffff',
+            border: '1px solid #ffffff'
+        },
+    };
+
+    update(); // run function once at first to avoid delay
+    setInterval(update, 1000); // 1k = 1s
+</script>
+
+
+</body>
+</html>
