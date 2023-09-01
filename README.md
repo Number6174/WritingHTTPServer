@@ -117,6 +117,9 @@ Where
 Performs a currency conversion using [this API](https://github.com/fawazahmed0/currency-api).
 Returns just a string of the converted amount
 
+### GET /api/rewasd_queue
+Returns a JSON representation of the current events in the reWASD queue.
+
 ### GET /api/timer
 Returns the contents of `timer_data.json`. This is the best way to obtain the current timer information.
 See [examples/timer.html](examples/timer.html) for how you might use this.

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import datetime
 import http.server
 import json
+from json import JSONEncoder
 import logging
 import logging.handlers
 import os
@@ -117,6 +118,13 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(bytes(str(converted), "utf-8"))
+            return
+        elif url.path == "/api/rewasd_queue":
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(bytes(rewasd_queue_to_json(), "utf8"))
             return
         elif url.path == "/api/timer":
             # Open timer_data.json
@@ -833,6 +841,21 @@ def rewasd_timer_thread():
         rewasd_queue.pop(0)
         rewasd_lock.release()
         rewasd_in_progress_start = None
+
+
+def rewasd_queue_to_json():
+    result = dict()
+
+    if rewasd_in_progress_start is None:
+        result["current_start"] = None
+    else:
+        result["current_start"] = rewasd_in_progress_start.isoformat(
+            timespec="milliseconds"
+        )
+
+    result["events"] = [[x.name, x.duration] for x in rewasd_queue]
+
+    return JSONEncoder(indent=4).encode(result)
 
 
 @dataclass
