@@ -316,8 +316,7 @@ Where
 This will change the `device_id` to the `change_to` slot and when complete, change it to the `return_to` slot.
 
 This internally uses a timer system so only one change is active at any moment. The events will queue up. The "same"
-event will coalesce together. Two events are considered the same if they have the same `device_id`, `name`, `change_to`,
-and `return_to`.
+event will coalesce together. Two events are considered the same if they have the same `name`.
 
 ## GET /write
 

@@ -867,12 +867,7 @@ class ReWASDTimerElement:
     duration: int
 
     def __eq__(self, other):
-        return (self.device_id, self.name, self.change_to, self.return_to) == (
-            other.device_id,
-            other.name,
-            other.change_to,
-            other.return_to,
-        )
+        return self.name == other.name
 
 
 rewasd_queue = list()
