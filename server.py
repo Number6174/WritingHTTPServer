@@ -701,8 +701,6 @@ def rewasd_select_slot_worker(device_id: str, slot: str):
     if response:
         logger.error(response)
         return
-    else:
-        logger.info("success")
 
 
 def rewasdApplyConfigWorker(device_id: str, path: str, slot: str):
@@ -727,8 +725,6 @@ def rewasdApplyConfigWorker(device_id: str, path: str, slot: str):
     response = subprocess.run(cmd, capture_output=True, text=True).stdout
     if response:
         logger.error(response)
-    else:
-        logger.info("success")
 
 
 def rewasd_add_to_queue(
