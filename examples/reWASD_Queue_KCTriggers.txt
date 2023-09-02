@@ -1,0 +1,85 @@
+# SPDX-FileCopyrightText: 2023 Number6174
+# SPDX-License-Identifier: Apache-2.0
+
+# Setup rewasd_queue.html for use with Number6174's WritingHTTPServer
+# https://github.com/Number6174/WritingHTTPServer
+
+# To configure this a few changes need to be made:
+# 1. Change reWASD_Device_ID in OnInit
+# 2. Change reWASD_Per_Dollar in OnInit
+# 3. Change the slots in the two OnMessage at the end
+# 4. Change which message is sent for the various events
+
+OnInit
+# The device-id to manipulate in reWASD, likely a keyboard or controller
+Variable Set reWASD_Device_ID 3298924320998364161
+# How many seconds of effect per dollar
+# This scaled for each of Bits/Subs/Tips/Hype Chats
+Variable Set reWASD_Per_Dollar 60
+
+# Chat triggers
+OnCommand bm 0 !crabwalk
+Message Send reWASD_CrabWalk {arg1}
+
+OnCommand bm 0 !reverse
+Message Send reWASD_ReverseWASD {arg1}
+
+# Subs
+OnCommand bm 0 !sub
+Message Send reWASD_SubHandler {arg1} {arg2}
+
+OnTWSubMessage
+Message Send reWASD_SubHandler {tier} 1
+
+OnTWSub
+# Gets handled by OnTWSubGift
+if 1 {is_gift} = true
+exit
+Message Send reWASD_SubHandler {tier} 1
+
+OnTWSubGift
+Message Send reWASD_SubHandler {tier} {amount}
+
+OnMessage reWASD_SubHandler
+Chat Send "SubHandler: data: '{data}'"
+Function 'var s = "{data}".split(" "); return {tier_dollar: s[0] == "3" ? 25 : s[0] == "2" ? 10 : 5, quantity: s[1]}'
+Variable Load reWASD_Per_Dollar
+Function 'return {seconds: Math.floor({tier_dollar} * {quantity} * {reWASD_Per_Dollar})}'
+Message Send reWASD_ReverseWASD {seconds}
+
+# Bits
+OnTWCheer
+Variable Load reWASD_Per_Dollar
+Function 'return {seconds: Math.floor({amount} / 100 * {reWASD_Per_Dollar})}'
+Message Send reWASD_CrabWalk {seconds}
+
+# Tips
+OnSLDonationNoSync
+Variable Load reWASD_Per_Dollar
+Function 'return {seconds: Math.floor({amount} * {reWASD_Per_Dollar})}'
+Message Send reWASD_CrabWalk {seconds}
+
+# Hype Chat
+# The following 5 lines can be replaced with just "OnHypeChat" in new enough versions of KC
+OnEveryChatMessage
+Function 'var d = [data]; return {is_hype_chat: "pinned-chat-paid-amount" in d.extra.userState}'
+if 1 {is_hype_chat} = false
+exit
+Function 'var d = [data]; return {amount: d.extra.userState["pinned-chat-paid-amount"], currency: d.extra.userState["pinned-chat-paid-currency"], exponent: d.extra.userState["pinned-chat-paid-exponent"]}'
+# OnHypeChat
+API GET http://127.0.0.1:8001/api/currency?amount={amount}&exponent={exponent}&currency={currency}
+Variable Load reWASD_Per_Dollar
+Function 'return {seconds: Math.floor({api_data} * {reWASD_Per_Dollar})}'
+Message Send reWASD_CrabWalk {seconds}
+
+# Crab Walk
+OnMessage reWASD_CrabWalk
+Chat Send "Crabwalk for {data} seconds"
+Variable Load reWASD_Device_ID
+API GET http://127.0.0.1:8001/rewasd?device_id={reWASD_Device_ID}&name=Crab%20Walk&duration={data}&change_to=slot2&return_to=slot1
+
+# Reverse WASD
+OnMessage reWASD_ReverseWASD
+Chat Send "Reverse WASD for {data} seconds"
+Variable Load reWASD_Device_ID
+API GET http://127.0.0.1:8001/rewasd?device_id={reWASD_Device_ID}&name=Reverse%20WASD&duration={data}&change_to=slot3&return_to=slot1
