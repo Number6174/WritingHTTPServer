@@ -883,7 +883,7 @@ def convert_currency(amount: float, exp: int, currency_code: str):
     global currency_conversion
     currency_rate = float(
         currency_conversion[config["event"]["hype-chat-currency"].lower()][
-            currency_code
+            currency_code.lower()
         ]
     )
     return amount / currency_rate
