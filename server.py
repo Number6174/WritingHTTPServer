@@ -113,6 +113,10 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
             code = query["currency"][0]
             converted = convert_currency(amount, exponent, code)
+            logger.debug(
+                f"/api/currency converted {amount} {exponent} {code} to {converted}"
+            )
+
             self.send_response(200)
             self.send_header("Content-type", "text/plain")
             self.send_header("Access-Control-Allow-Origin", "*")
