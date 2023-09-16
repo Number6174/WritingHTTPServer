@@ -366,7 +366,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 converted_amount = convert_currency(
                     float(query["hype_chat"][0]),
                     int(query["exponent"][0]),
-                    query["currency"][0].lower(),
+                    query["currency"][0],
                 )
 
                 amount_after_fees = converted_amount * (
