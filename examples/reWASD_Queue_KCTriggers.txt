@@ -10,6 +10,12 @@
 # 3. Change the slots in the two OnMessage at the end
 # 4. Change which message is sent for the various events
 
+################################################################################
+# OnInit stuff
+# This is where you'd customize reWASD_Device_ID, reWASD_Per_Dollar
+# and what games you want control manipulations to be enabled for
+################################################################################
+
 OnInit
 # The device-id to manipulate in reWASD, likely a keyboard or controller
 Variable Set reWASD_Device_ID 3298924320998364161
@@ -17,69 +23,113 @@ Variable Set reWASD_Device_ID 3298924320998364161
 # This scaled for each of Bits/Subs/Tips/Hype Chats
 Variable Set reWASD_Per_Dollar 60
 
+################################################################################
 # Chat triggers
+################################################################################
 OnCommand bm 0 !crabwalk
 Message Send reWASD_CrabWalk {arg1}
 
 OnCommand bm 0 !reverse
 Message Send reWASD_ReverseWASD {arg1}
 
-# Subs
-OnCommand bm 0 !sub
-Message Send reWASD_SubHandler {arg1} {arg2}
+OnCommand bm 0 !bits
+Message Send reWASD_Bit_Handler {arg1}
 
+OnCommand bm 0 !sub
+Message Send reWASD_Sub_Handler "{arg1} {arg2}"
+
+OnCommand bm 0 !tip
+Message Send reWASD_Tip_Handler {arg1}
+
+OnCommand bm 0 !hypechat
+Message Send reWASD_HypeChat_Handler "{arg1} {arg2} {arg3}"
+
+################################################################################
+# KC Triggers
+################################################################################
+
+# Subs
 OnTWSubMessage
-Message Send reWASD_SubHandler {tier} 1
+Message Send reWASD_Sub_Handler "{tier} 1"
 
 OnTWSub
-# Gets handled by OnTWSubGift
+# Gift subs also trigger OnTWSubGift, so skip gifts here
 if 1 {is_gift} = true
 exit
-Message Send reWASD_SubHandler {tier} 1
+Message Send reWASD_Sub_Handler "{tier} 1"
 
 OnTWSubGift
-Message Send reWASD_SubHandler {tier} {amount}
+Message Send reWASD_Sub_Handler "{tier} {amount}"
 
-OnMessage reWASD_SubHandler
-Chat Send "SubHandler: data: '{data}'"
+# Bits
+OnTWCheer
+Message Send reWASD_Bit_Handler {amount}
+
+# Tips
+OnSLDonationNoSync
+Message Send reWASD_Tip_Handler {amount}
+
+# Hype Chat - Requires KC 2.0.3
+OnHypeChat *
+Chat Send "Hype Chat from {user} for {formatted_amount} {currency}"
+Message Send reWASD_HypeChat_Handler "{amount} {exponent} {currency}"
+
+# Hype Chat - Workaround, only needed for KC prior to 2.0.3
+# OnEveryChatMessage
+# Function 'var d = [data]; return {is_hype_chat: "pinned-chat-paid-amount" in d.extra.userState}'
+# if 1 {is_hype_chat} = false
+# exit
+# Function 'var d = [data]; return {amount: d.extra.userState["pinned-chat-paid-amount"], currency: d.extra.userState["pinned-chat-paid-currency"], exponent: d.extra.userState["pinned-chat-paid-exponent"]}'
+# Message Send reWASD_HypeChat_Handler "{amount} {exponent} {currency}"
+
+################################################################################
+# Handlers - These are called by both the chat commands and KC triggers
+# This is where you'd customize the outcome (crabwalk / reverse) for each event
+# type (bit / sub / tip / hype chat)
+################################################################################
+
+OnMessage reWASD_Bit_Handler
+Variable Load reWASD_Per_Dollar
+Function 'return {seconds: Math.floor({data} / 100 * {reWASD_Per_Dollar})}'
+Message Send reWASD_CrabWalk {seconds}
+
+OnMessage reWASD_Sub_Handler
 Function 'var s = "{data}".split(" "); return {tier_dollar: s[0] == "3" ? 25 : s[0] == "2" ? 10 : 5, quantity: s[1]}'
 Variable Load reWASD_Per_Dollar
 Function 'return {seconds: Math.floor({tier_dollar} * {quantity} * {reWASD_Per_Dollar})}'
 Message Send reWASD_ReverseWASD {seconds}
 
-# Bits
-OnTWCheer
+OnMessage reWASD_Tip_Handler
 Variable Load reWASD_Per_Dollar
-Function 'return {seconds: Math.floor({amount} / 100 * {reWASD_Per_Dollar})}'
+Function 'return {seconds: Math.floor({data} * {reWASD_Per_Dollar})}'
 Message Send reWASD_CrabWalk {seconds}
 
-# Tips
-OnSLDonationNoSync
-Variable Load reWASD_Per_Dollar
-Function 'return {seconds: Math.floor({amount} * {reWASD_Per_Dollar})}'
-Message Send reWASD_CrabWalk {seconds}
-
-# Hype Chat
-# The following 5 lines can be replaced with just "OnHypeChat" in new enough versions of KC
-OnEveryChatMessage
-Function 'var d = [data]; return {is_hype_chat: "pinned-chat-paid-amount" in d.extra.userState}'
-if 1 {is_hype_chat} = false
-exit
-Function 'var d = [data]; return {amount: d.extra.userState["pinned-chat-paid-amount"], currency: d.extra.userState["pinned-chat-paid-currency"], exponent: d.extra.userState["pinned-chat-paid-exponent"]}'
-# OnHypeChat
+OnMessage reWASD_HypeChat_Handler
+Function 'var s = "{data}".split(" "); return {amount: s[0], exponent: s[1], currency: s[2]}'
 API GET http://127.0.0.1:8001/api/currency?amount={amount}&exponent={exponent}&currency={currency}
 Variable Load reWASD_Per_Dollar
 Function 'return {seconds: Math.floor({api_data} * {reWASD_Per_Dollar})}'
 Message Send reWASD_CrabWalk {seconds}
 
+################################################################################
+# reWASD Interactions
+# This is where you need to customize the slots
+################################################################################
+
 # Crab Walk
 OnMessage reWASD_CrabWalk
+Variable Load reWASD_Enabled
+if 1 {reWASD_Enabled} = false
+exit
 Chat Send "Crabwalk for {data} seconds"
 Variable Load reWASD_Device_ID
 API GET http://127.0.0.1:8001/rewasd?device_id={reWASD_Device_ID}&name=Crab%20Walk&duration={data}&change_to=slot2&return_to=slot1
 
 # Reverse WASD
 OnMessage reWASD_ReverseWASD
+Variable Load reWASD_Enabled
+if 1 {reWASD_Enabled} = false
+exit
 Chat Send "Reverse WASD for {data} seconds"
 Variable Load reWASD_Device_ID
 API GET http://127.0.0.1:8001/rewasd?device_id={reWASD_Device_ID}&name=Reverse%20WASD&duration={data}&change_to=slot3&return_to=slot1
