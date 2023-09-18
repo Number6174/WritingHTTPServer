@@ -19,6 +19,6 @@ pyinstaller-hooks-contrib==2023.8
 pynput==1.7.6
 python-dateutil==2.8.2
 pywin32-ctypes==0.2.2
-rfc3986==1.5.0
+rfc3986==2.0.0
 six==1.16.0
 sniffio==1.3.0
