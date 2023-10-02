@@ -10,7 +10,7 @@ httpcore==0.18.0
 httpx==0.25.0
 idna==3.4
 mypy-extensions==1.0.0
-packaging==23.1
+packaging==23.2
 pathspec==0.11.2
 pefile==2023.2.7
 platformdirs==3.10.0
