@@ -2,7 +2,7 @@ altgraph==0.17.3
 anyio==3.7.1
 black==23.9.1
 certifi==2023.7.22
-charset-normalizer==3.2.0
+charset-normalizer==3.3.0
 click==8.1.7
 colorama==0.4.6
 h11==0.14.0
