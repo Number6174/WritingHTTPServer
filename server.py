@@ -996,10 +996,8 @@ def get_currency_conversion(config):
     base_currency = config["event"]["hype-chat-currency"].lower()
 
     mirrors = [
-        f"https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{base_currency}.min.json",
-        f"https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{base_currency}.json",
-        f"https://raw.githubusercontent.com/fawazahmed0/currency-api/1/latest/currencies/{base_currency}.min.json",
-        f"https://raw.githubusercontent.com/fawazahmed0/currency-api/1/latest/currencies/{base_currency}.json",
+        f"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/{base_currency}.min.json",
+        f"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/{base_currency}.json",
     ]
     # Timeout controls how many seconds to wait before first byte of
     # response. This is not limiting the total connection time if it
