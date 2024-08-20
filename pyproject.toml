@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: 2024 Number6174
+# SPDX-License-Identifier: CC0-1.0
+
+[tool.poetry]
+name = "writinghttpserver"
+version = "0.1.0"
+description = ""
+authors = ["Number6174"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.14"
+python-dateutil = "^2.9.0.post0"
+pynput = "^1.7.7"
+httpx = "^0.27.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.8.0"
+pyinstaller = "^6.10.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
