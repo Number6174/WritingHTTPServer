@@ -683,6 +683,11 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         if "log" in query:
             data = datetime.datetime.now().isoformat() + " - " + data + "\n"
 
+        if "prepend_newline" in query:
+            data = "\n" + data
+        if "append_newline" in query:
+            data = data + "\n"
+
         # Actually write to the file
         with open(filename, mode) as w:
             w.write(data)

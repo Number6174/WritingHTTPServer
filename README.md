@@ -322,7 +322,11 @@ It will open up the filename `filename.txt` and replace the contents with `conte
 Unless otherwise specified, the file `filename.txt` will be in the same directory as the script.
 Be careful of what file you specify, if it is important, it will be overwritten.
 
-There are optional query parameters of `mode`, and `log`. The `mode` parameter accepts either `w` to overwrite the file contents or `a` to append to the file. The `log` paramater ignores any values, but if present, will put the new data on a line by itself with a timestamp.
+There are optional query parameters of `mode`, `prepend_newline`, `append_newline` and `log`.
+* The `mode` parameter accepts either `w` to overwrite the file contents or `a` to append to the file.
+* The `prepend_newline` parameter ignores any values, but if present, will put a newline prior to the new data.
+* The `append_newline` parameter ignores any values, but if present, will put a newline after the new data. 
+* The `log` parameter ignores any values, but if present, will put the new data on a line by itself with a timestamp.
 
 For example, if you made the two successive requests of
 
