@@ -48,7 +48,7 @@ jobs:
     # Run pyinstaller
     - name: pyinstaller freeze
       run: |
-        pyinstaller server.spec
+        poetry run pyinstaller server.spec
     # Package up release
     - name: Zip Files
       run: |
