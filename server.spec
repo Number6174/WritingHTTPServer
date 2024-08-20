@@ -2,7 +2,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 # SPDX-FileCopyrightText: 2023 Number6174
 # SPDX-License-Identifier: CC0-1.0
-
+import shutil
 
 block_cipher = None
 
@@ -60,3 +60,9 @@ coll = COLLECT(
     upx_exclude=[],
     name="server",
 )
+
+# Pyinstaller 6.0 moves all files into internal locations, need to manually copy them to the right place now
+shutil.copy("config.json", "dist/server")
+shutil.copy("config.json.license", "dist/server")
+shutil.copy("control_panel.html", "dist/server")
+shutil.copytree("examples", "dist/server/examples")
