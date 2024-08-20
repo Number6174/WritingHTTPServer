@@ -25,17 +25,11 @@ The provided configuration has it listen only on 127.0.0.1. It is not recommende
 2. Unzip in a directory where the script will have write permissions
 
 ## Manual
-1. Install Python for [Windows](https://www.python.org/downloads/windows/) (tested with 3.11.4)
+1. Install Python for [Windows](https://www.python.org/downloads/windows/) (tested with 3.12.5)
 2. Verify Python is in your PATH. This can be done by running
-`python --version` in the Windows Terminal. You should see a response like `Python 3.11.4`
-3. Ensure the following Python packages are installed. You may wish to do this in a [venv](https://docs.python.org/3/tutorial/venv.html). Each can be installed as `pip install` or just use `pip install -r requirements.txt`
-    * python-dateutil
-    * pynput
-    * httpx
-
-   If you wish to develop the program further, also include
-    * black
-    * pyinstaller
+`python --version` in the Windows Terminal. You should see a response like `Python 3.12.5`
+3. Verify [Poetry](https://python-poetry.org/) is set up and working
+4. Run `poetry install` to install the dependencies
 
 # Use
 
