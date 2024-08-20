@@ -55,6 +55,6 @@ jobs:
         7z a -tzip WritingHTTPServer.zip ./dist/server/*
     # Create release
     - name: Create release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         files: WritingHTTPServer.zip
