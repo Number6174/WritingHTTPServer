@@ -174,7 +174,7 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
     def handle_event(self):
         global logger
         # Extract query
-        query = parse_qs(urlparse(self.path).query)
+        query = parse_qs(urlparse(self.path).query, keep_blank_values=True)
 
         global config
 
