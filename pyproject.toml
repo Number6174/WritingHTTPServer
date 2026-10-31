@@ -10,7 +10,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.14,<3.15"
-python-dateutil = "^2.9.0.post0"
+python-dateutil = ">=2.9,<4.0"
 pynput = "^1.8.2"
 httpx = "^0.28.1"
 
