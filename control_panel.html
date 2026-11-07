@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <html>
   <head>
     <title>WritingHTTPServer Control Panel</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <style>
         div.alert {
@@ -44,27 +43,39 @@ SPDX-License-Identifier: Apache-2.0
 
     <script>
         function get_version() {
-            jQuery.ajax({
-                url: '/api/version',
-                dataType: 'text'
-            })
-            .done(function (data) {
-                document.getElementById("version_number").innerHTML = data
-            })
+          fetch('/api/version')
+                  .then(response => {
+                    if (!response.ok) {
+                      throw new Error('Network response in get_version was not OK');
+                    }
+                    return response.text();
+                  })
+                  .then(data => {
+                    document.getElementById("version_number").innerHTML = data;
+                  })
+                  .catch(error => {
+                    console.error('Error fetching version:', error);
+                  });
         }
 
         function version_check() {
-            jQuery.ajax({
-                url: 'https://api.github.com/repos/Number6174/WritingHTTPServer/releases/latest',
-                dataType: 'json'
-            })
-            .done(function (data) {
-                published_version = data['tag_name']
+          fetch('https://api.github.com/repos/Number6174/WritingHTTPServer/releases/latest')
+                  .then(response => {
+                    if (!response.ok) {
+                      throw new Error('Network response in version_check was not OK');
+                    }
+                    return response.json();
+                  })
+                  .then(data => {
+                    published_version = data['tag_name']
 
-                if (published_version.trim() > document.getElementById("version_number").innerHTML.trim()) {
-                    document.getElementById("update_alert").innerHTML = "Version " + published_version + " is available. Please update when you can."
-                }
-            })
+                    if (published_version.trim() > document.getElementById("version_number").innerHTML.trim()) {
+                        document.getElementById("update_alert").innerHTML = "Version " + published_version + " is available. Please update when you can."
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error in version_check:', error);
+                  })
         }
     </script>
 
@@ -105,19 +116,23 @@ SPDX-License-Identifier: Apache-2.0
             secondsSpan.innerHTML = ('0' + t.seconds).slice(-2);
         }
         function updateTimerFromServer() {
-            jQuery.ajax({
-                url: '/api/timer',
-                dataType: 'json'
-            })
-            .done(function (data) {
-                document.getElementById("alert").style.display = 'none';
-                endtime = data['current-end'];
-                points_funded = data['points-funded'];
-                points_to_fully_fund = data['points-to-fully-fund'];
-            })
-            .fail(function (){
-                document.getElementById("alert").style.display = 'block';
-            });
+          fetch('/api/timer')
+                  .then(response => {
+                    if (!response.ok) {
+                      throw new Error('Network response in updateTimerFromServer was not OK');
+                    }
+                    return response.json();
+                  })
+                  .then(data => {
+                    document.getElementById("alert").style.display = 'none';
+                    endtime = data['current-end'];
+                    points_funded = data['points-funded'];
+                    points_to_fully_fund = data['points-to-fully-fund'];
+                  })
+                  .catch(error => {
+                    document.getElementById("alert").style.display = 'block';
+                    console.error('Error fetching timer data:', error);
+                  });
         }
 
         function updatePoints() {
@@ -150,7 +165,7 @@ SPDX-License-Identifier: Apache-2.0
     <script>
         document.getElementById("timer_reset").onclick=async () =>{
             if (confirm("WARNING: This will destroy the current timer information. Are you sure?")) {
-                jQuery.ajax('/api/resettimer')
+                await fetch('/api/resettimer')
             }
         };
     </script>
@@ -216,7 +231,7 @@ SPDX-License-Identifier: Apache-2.0
             const message = document.getElementById("timer_sub_message").value
 
             const path = '/event?sub=self&name=' + username + '&tier=' + tier + '&months=' + months + '&message=' + message
-            jQuery.ajax(path)
+            fetch(path)
             updateAllTimer()
         }
         document.getElementById("timer_sub_prime").onclick=async () =>{
@@ -238,7 +253,7 @@ SPDX-License-Identifier: Apache-2.0
             const months = document.getElementById("timer_sub_months").value
 
             const path = '/event?sub=gift&gifter=' + gifter + '&recipient=' + recipient + '&tier=' + tier + '&months=' + months
-            jQuery.ajax(path)
+            fetch(path)
             updateAllTimer()
         }
         document.getElementById("timer_gift_t1").onclick=async () =>{
@@ -256,7 +271,7 @@ SPDX-License-Identifier: Apache-2.0
             const amount = document.getElementById("timer_community_amount").value
  
             const path = '/event?sub=community&name=' + name + '&tier=' + tier + '&quantity=' + amount
-            jQuery.ajax(path)
+            fetch(path)
             updateAllTimer()
         }
         document.getElementById("timer_community_t1").onclick=async () =>{
@@ -277,7 +292,7 @@ SPDX-License-Identifier: Apache-2.0
             const message = document.getElementById("timer_sub_message").value
 
             const path = '/event?name=' + username + '&bits=' + amount + '&message=' + message
-            jQuery.ajax(path)
+            await fetch(path)
             updateAllTimer()
         };
         document.getElementById("timer_add_tip").onclick=async () =>{
@@ -286,29 +301,29 @@ SPDX-License-Identifier: Apache-2.0
             const message = document.getElementById("timer_tip_message").value
 
             const path = '/event?name=' + username + '&tip=' + amount + '&message=' + message
-            jQuery.ajax(path)
+            await fetch(path)
             updateAllTimer()
         };
 
         document.getElementById("timer_increase_time").onclick=async () =>{
-            jQuery.ajax('/event?time=increase&amount=' + document.getElementById("timer_modify_text").value  )
+            await fetch('/event?time=increase&amount=' + document.getElementById("timer_modify_text").value)
             updateAllTimer()
         };
         document.getElementById("timer_decrease_time").onclick=async () =>{
-            jQuery.ajax('/event?time=decrease&amount=' + document.getElementById("timer_modify_text").value  )
+            await fetch('/event?time=decrease&amount=' + document.getElementById("timer_modify_text").value)
             updateAllTimer()
         };
 
         document.getElementById("timer_points_set").onclick=async () =>{
-            jQuery.ajax('/event?points=set&amount=' + document.getElementById("timer_points_qty").value  )
+            await fetch('/event?points=set&amount=' + document.getElementById("timer_points_qty").value)
             updateAllTimer()
         };
         document.getElementById("timer_points_increase").onclick=async () =>{
-            jQuery.ajax('/event?points=increase&amount=' + document.getElementById("timer_points_qty").value  )
+            await fetch('/event?points=increase&amount=' + document.getElementById("timer_points_qty").value)
             updateAllTimer()
         };
         document.getElementById("timer_points_decrease").onclick=async () =>{
-            jQuery.ajax('/event?points=decrease&amount=' + document.getElementById("timer_points_qty").value  )
+            await fetch('/event?points=decrease&amount=' + document.getElementById("timer_points_qty").value)
             updateAllTimer()
         };
 
@@ -359,90 +374,121 @@ SPDX-License-Identifier: Apache-2.0
     Every T3 sub contributes <input type="number" id="config_timer_t3_sub" /> points
 
     <script>
-        function read_timer_current_config() {
-            let resp = jQuery.get('/api/timer')
-            
-            $.when(resp).done(function(){
-                data = resp.responseJSON
+      async function read_timer_current_config() {
+          try {
+            const resp = await fetch('/api/timer');
+            if (!resp.ok) {
+              throw new Error('Network response was not OK in read_timer_current_config');
+            }
 
-                document.getElementById("timer_start_datetime").value = data['stream-start']
-                document.getElementById("timer_stream_end_datetime").value = data['stream-end']
-                document.getElementById("timer_stream_current_end_datetime").value = data['current-end']
-                document.getElementById("timer_points_funded").value = data['points-funded']
-                document.getElementById("timer_points_to_fully_fund").value = data['points-to-fully-fund']
-                document.getElementById("timer_start").value = data['timer-start']
-                document.getElementById("timer_time_fundable").value = data['time-fundable']
-                document.getElementById("timer_time_adjust").value = data['time-adjust']
-            })
+            const data = await resp.json();
+
+            document.getElementById("timer_start_datetime").value = data['stream-start'];
+            document.getElementById("timer_stream_end_datetime").value = data['stream-end'];
+            document.getElementById("timer_stream_current_end_datetime").value = data['current-end'];
+            document.getElementById("timer_points_funded").value = data['points-funded'];
+            document.getElementById("timer_points_to_fully_fund").value = data['points-to-fully-fund'];
+            document.getElementById("timer_start").value = data['timer-start'];
+            document.getElementById("timer_time_fundable").value = data['time-fundable'];
+            document.getElementById("timer_time_adjust").value = data['time-adjust'];
+
+          } catch (error) {
+            console.error('Error fetching timer current config:', error);
+          }
         }
 
-        function read_timer_every_config() {
-            let resp = jQuery.get('/api/config')
-            
-            $.when(resp).done(function(){
-                config = resp.responseJSON
+      async function read_timer_every_config() {
+        try {
+          const resp = await fetch('/api/timer');
+          if (!resp.ok) {
+            throw new Error('Network response was not OK in read_timer_every_config');
+          }
 
-                document.getElementById("config_timer_start").value = config['timer']['stream-start']
-                document.getElementById("config_timer_initial").value = config['timer']['timer-start']
-                document.getElementById("config_timer_max_fund_time").value = config['timer']['time-fundable']
-                document.getElementById("config_timer_max_points").value = config['timer']['points-to-fully-fund']
+          const data = await resp.json();
 
-                document.getElementById("config_timer_bits").value = config['event']['per100bits']
-                document.getElementById("config_timer_tips").value = config['event']['perdollartip']
-                document.getElementById("config_timer_tip_fee_percent").value = config['event']['tip-fee-percent']
-                document.getElementById("config_timer_fee_fixed").value = config['event']['tip-fee-fixed']
-                document.getElementById("config_timer_prime_sub").value = config['event']['prime-sub']
-                document.getElementById("config_timer_t1_sub").value = config['event']['t1-sub']
-                document.getElementById("config_timer_t2_sub").value = config['event']['t2-sub']
-                document.getElementById("config_timer_t3_sub").value = config['event']['t3-sub']
-            })
+          document.getElementById("config_timer_start").value = data['timer']['stream-start']
+          document.getElementById("config_timer_initial").value = data['timer']['timer-start']
+          document.getElementById("config_timer_max_fund_time").value = data['timer']['time-fundable']
+          document.getElementById("config_timer_max_points").value = data['timer']['points-to-fully-fund']
+
+          document.getElementById("config_timer_bits").value = data['event']['per100bits']
+          document.getElementById("config_timer_tips").value = data['event']['perdollartip']
+          document.getElementById("config_timer_tip_fee_percent").value = data['event']['tip-fee-percent']
+          document.getElementById("config_timer_fee_fixed").value = data['event']['tip-fee-fixed']
+          document.getElementById("config_timer_prime_sub").value = data['event']['prime-sub']
+          document.getElementById("config_timer_t1_sub").value = data['event']['t1-sub']
+          document.getElementById("config_timer_t2_sub").value = data['event']['t2-sub']
+          document.getElementById("config_timer_t3_sub").value = data['event']['t3-sub']
+        } catch (error) {
+          console.error('Error fetching timer every config:', error);
         }
+      }
 
         document.getElementById("config_current_read").onclick=async () =>{
-            read_timer_current_config();
+            await read_timer_current_config();
         };
         document.getElementById("config_every_read").onclick=async () =>{
-            read_timer_every_config();
+            await read_timer_every_config();
         };
 
         document.getElementById("config_current_write").onclick=async () =>{
-            jQuery.ajax({
-                url: '/api/configwriter/timer_data',
-                method: 'PUT',
-                data: JSON.stringify({
-                    "stream-start": document.getElementById("timer_start_datetime").value,
-                    "stream-end": document.getElementById("timer_stream_end_datetime").value,
-                    "current-end": document.getElementById("timer_stream_current_end_datetime").value,
-                    "points-funded": parseInt(document.getElementById("timer_points_funded").value),
-                    "points-to-fully-fund": parseInt(document.getElementById("timer_points_to_fully_fund").value),
-                    "time-adjust": parseInt(document.getElementById("timer_time_adjust").value)
-                })
-            });
+          fetch('/api/configwriter/timer_data', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              "stream-start": document.getElementById("timer_start_datetime").value,
+              "stream-end": document.getElementById("timer_stream_end_datetime").value,
+              "current-end": document.getElementById("timer_stream_current_end_datetime").value,
+              "points-funded": parseInt(document.getElementById("timer_points_funded").value, 10),
+              "points-to-fully-fund": parseInt(document.getElementById("timer_points_to_fully_fund").value, 10),
+              "time-adjust": parseInt(document.getElementById("timer_time_adjust").value, 10)
+            })
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP error: ${response.status} in /api/configwriter/timer_data`);
+            }
+          })
+          .catch(error => {
+            console.error('Error updating timer data in /api/configwriter/timer_data:', error);
+          });
         };
 
         document.getElementById("config_every_write").onclick=async () =>{
-            jQuery.ajax({
-                url: '/api/configwriter/config',
-                method: 'PUT',
-                data: JSON.stringify({
-                    "event": {
-                        "per100bits": parseInt(document.getElementById("config_timer_bits").value),
-                        "perdollartip": parseInt(document.getElementById("config_timer_tips").value),
-                        "tip-fee-percent": parseFloat(document.getElementById("config_timer_tip_fee_percent").value),
-                        "tip-fee-fixed": parseFloat(document.getElementById("config_timer_fee_fixed").value),
-                        "prime-sub": parseInt(document.getElementById("config_timer_prime_sub").value),
-                        "t1-sub": parseInt(document.getElementById("config_timer_t1_sub").value),
-                        "t2-sub": parseInt(document.getElementById("config_timer_t2_sub").value),
-                        "t3-sub": parseInt(document.getElementById("config_timer_t3_sub").value)
-                    },
-                    "timer": {
-                        "stream-start": document.getElementById("config_timer_start").value,
-                        "timer-start": document.getElementById("config_timer_initial").value,
-                        "time-fundable": document.getElementById("config_timer_max_fund_time").value,
-                        "points-to-fully-fund": parseInt(document.getElementById("config_timer_max_points").value)
-                    }
-                })
-            });
+          fetch('/api/configwriter/config', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              "event": {
+                "per100bits": parseInt(document.getElementById("config_timer_bits").value, 10),
+                "perdollartip": parseInt(document.getElementById("config_timer_tips").value, 10),
+                "tip-fee-percent": parseFloat(document.getElementById("config_timer_tip_fee_percent").value),
+                "tip-fee-fixed": parseFloat(document.getElementById("config_timer_fee_fixed").value),
+                "prime-sub": parseInt(document.getElementById("config_timer_prime_sub").value, 10),
+                "t1-sub": parseInt(document.getElementById("config_timer_t1_sub").value, 10),
+                "t2-sub": parseInt(document.getElementById("config_timer_t2_sub").value, 10),
+                "t3-sub": parseInt(document.getElementById("config_timer_t3_sub").value, 10)
+              },
+              "timer": {
+                "stream-start": document.getElementById("config_timer_start").value,
+                "timer-start": document.getElementById("config_timer_initial").value,
+                "time-fundable": document.getElementById("config_timer_max_fund_time").value,
+                "points-to-fully-fund": parseInt(document.getElementById("config_timer_max_points").value, 10)
+              }
+            })
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP error: ${response.status} in /api/configwriter/config`);
+            }
+          })
+          .catch(error => {
+            console.error('Error updating configuration in /api/configwriter/config:', error);
+          });
         };
     </script>
 
@@ -480,25 +526,25 @@ SPDX-License-Identifier: Apache-2.0
 
     <script>
         document.getElementById("hype_start_button").onclick=async () =>{
-            jQuery.ajax('/event?train=start')
+            await fetch('/event?train=start')
         };
         document.getElementById("hype_end_button").onclick=async () =>{
-            jQuery.ajax('/event?train=end&sub_conductor=' + document.getElementById("hype_end_sub_conductor").value
-            + '&bit_conductor=' + document.getElementById("hype_end_gift_conductor").value)
+            await fetch('/event?train=end&sub_conductor=' + document.getElementById("hype_end_sub_conductor").value
+                    + '&bit_conductor=' + document.getElementById("hype_end_gift_conductor").value)
         };
 
         document.getElementById("hype_progress_button").onclick=async () =>{
-            jQuery.ajax('/event?train=progress&level=' + document.getElementById("hype_progress_level").value
-             + '&progress=' + document.getElementById("hype_progress_progress").value
-             + '&total=' + document.getElementById("hype_progress_total").value)
+            await fetch('/event?train=progress&level=' + document.getElementById("hype_progress_level").value
+                    + '&progress=' + document.getElementById("hype_progress_progress").value
+                    + '&total=' + document.getElementById("hype_progress_total").value)
         };
 
 
         document.getElementById("hype_conductor_button").onclick=async () =>{
-            jQuery.ajax('/event?train=conductor&sub_conductor=' + document.getElementById("hype_conductor_sub_conductor").value + '&bit_conductor=' + document.getElementById("hype_conductor_gift_conductor").value)
+            await fetch('/event?train=conductor&sub_conductor=' + document.getElementById("hype_conductor_sub_conductor").value + '&bit_conductor=' + document.getElementById("hype_conductor_gift_conductor").value)
         };
         document.getElementById("hype_cooldown_button").onclick=async () =>{
-            jQuery.ajax('/event?train=cooldownover')
+            await fetch('/event?train=cooldownover')
         };
     </script>
 
@@ -508,25 +554,35 @@ SPDX-License-Identifier: Apache-2.0
 
     <script>
         function updateEventText() {
-            jQuery.ajax({
-                url: '/api/events',
-                dataType: 'text'
+          fetch('/api/events')
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`HTTP error in /api/events: ${response.status}`);
+              }
+              return response.text();
             })
-                .done(function (data) {
-                    let ta = $('#eventTextArea')
-                    ta.val(data);
-                    let str = ta[0].value;
-                    if (str) {
-                        let cols = 0;
-                        let lines = str.split("\n");
-                        lines.forEach(l => {
-                            if (l.length > cols)
-                                cols = l.length;
-                        });
-                        ta[0].rows = lines.length + 1 > 50? 50 : lines.length + 1;
-                        ta[0].cols = cols + 1;
-                    }
-                })
+            .then(data => {
+              let ta = document.getElementById('eventTextArea');
+
+              ta.value = data;
+              let str = ta.value;
+
+              if (str) {
+                let cols = 0;
+                let lines = str.split("\n");
+
+                lines.forEach(l => {
+                  if (l.length > cols)
+                    cols = l.length;
+                });
+
+                ta.rows = Math.min(lines.length + 1, 50);
+                ta.cols = cols + 1;
+              }
+            })
+            .catch(error => {
+              console.error('Error fetching events in updateEventText:', error);
+            });
         }
     </script>
 
@@ -607,7 +663,7 @@ SPDX-License-Identifier: Apache-2.0
 
         document.getElementById("kepress_test").onclick=async () =>{
             
-            jQuery.ajax(document.getElementById("keypress_url").value)
+            await fetch(document.getElementById("keypress_url").value)
         }
     </script>
 
