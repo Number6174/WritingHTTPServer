@@ -91,6 +91,16 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         self.success_response()
 
+    def do_OPTIONS(self):
+        global logger
+        logger.debug("Handling OPTIONS (CORS pre-flight) to " + self.path)
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "*")
+        self.send_header("Access-Control-Allow-Private-Network", "true")
+        self.end_headers()
+
     def success_response(self):
         # Write response
         self.send_response(200)
