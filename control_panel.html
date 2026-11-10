@@ -399,7 +399,7 @@ SPDX-License-Identifier: Apache-2.0
 
       async function read_timer_every_config() {
         try {
-          const resp = await fetch('/api/timer');
+          const resp = await fetch('/api/config');
           if (!resp.ok) {
             throw new Error('Network response was not OK in read_timer_every_config');
           }
