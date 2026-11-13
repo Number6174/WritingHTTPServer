@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "WritingHTTPServer",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
