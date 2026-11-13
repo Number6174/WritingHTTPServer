@@ -22,5 +22,21 @@
     "port": 8001,
     "rewasd": {
         "path": "C:/Program Files/reWASD/reWASDCommandLine.exe"
-    }
+    },
+    "file": [
+        {
+            "prefix": "examples",
+            "path": "examples"
+        },
+        {
+            "prefix": "timer.html",
+            "path": "examples/timer.html"
+        },
+        {
+            "prefix": "foo",
+            "path": "C:/Users/username/Documents/Streaming Stuff"
+        }
+    ]
+
+
 }

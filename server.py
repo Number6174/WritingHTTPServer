@@ -10,6 +10,7 @@ import logging
 import logging.handlers
 import os
 import os.path
+from pathlib import Path
 import subprocess
 import sys
 import threading
@@ -45,6 +46,9 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif url.path == "/event":
             logger.debug("%s", url)
             self.handle_event()
+        elif url.path.startswith("/file"):
+            logger.debug("%s", url)
+            self.handle_file()
         elif url.path == "/keypress":
             logger.debug("%s", url)
             self.handle_keypress()
@@ -496,6 +500,62 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 json.dump(timer_data, f, indent=4)
 
         self.success_response()
+
+    def handle_file(self):
+        # Ensure files are configured
+        if "file" not in config:
+            logging.debug("No files configured in config.json, so 404 for " + self.path)
+            self.send_response(404)
+            self.end_headers()
+            return
+
+        url_requested = urlparse(self.path).path
+        file_requested = url_requested[len("/file/"):]
+
+        # Find the matching file entry
+        for entry in config["file"]:
+            if file_requested.startswith(entry["prefix"]):
+                entry_path = Path(entry["path"])
+                if file_requested == entry["prefix"] and entry_path.is_file():
+                    self.send_file(entry_path)
+                    return
+                elif entry_path.is_dir():
+                    file_path = Path(entry_path / str(file_requested[len(entry["prefix"]) + 1:]))
+
+                    if file_path.is_file():
+                        self.send_file(file_path)
+                    else:
+                        logging.debug("File not found: " + str(file_path) + " for request " + self.path)
+                        self.send_response(404)
+                        self.end_headers()
+                    return
+
+        logging.debug("Prefix not found for request " + self.path)
+        self.send_response(404)
+        self.end_headers()
+
+    def send_file(self, file_path):
+        MIME_TYPES = {
+            ".gif": "image/gif",
+            ".html": "text/html",
+            ".jpeg": "image/jpeg",
+            ".jpg": "image/jpeg",
+            ".js": "text/javascript",
+            ".png": "image/png",
+            ".txt": "text/plain",
+            ".webm": "video/webm"
+        }
+        if file_path.suffix in MIME_TYPES.keys():
+            content_type = MIME_TYPES[file_path.suffix]
+        else:
+            content_type = "application/octet-stream"
+
+        logger.debug("Serving file: " + str(file_path) + " for request " + self.path + " as type " + file_path.suffix + " MIME/type: " + content_type)
+        self.send_response(200)
+        self.send_header("Content-type", content_type)
+        self.end_headers()
+        with open(file_path, "rb") as f:
+            self.wfile.write(f.read())
 
     def handle_keypress(self):
         global logger
@@ -1043,6 +1103,19 @@ def get_currency_conversion(config):
 
     sys.exit(1)
 
+def check_file_serve_mapping(config: dict):
+    if "file" not  in config:
+        return
+
+    # Check for duplicated prefix
+    seen_prefixes = set()
+    for entry in config["file"]:
+        prefix = entry["prefix"]
+        if prefix in seen_prefixes:
+            logging.critical("Duplicate prefix " + prefix + " in file serve configuration")
+            print("Duplicate prefix " + prefix + " in file serve configuration")
+        seen_prefixes.add(prefix)
+
 
 def startServer():
     global logger
@@ -1070,6 +1143,8 @@ def startServer():
 
     global currency_conversion
     currency_conversion = get_currency_conversion(config)
+
+    check_file_serve_mapping(config)
 
     print("WritingHTTPServer " + version_string() + " by Number6174")
     print("Server started on http://" + config["host"] + ":" + str(config["port"]))
