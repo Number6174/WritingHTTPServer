@@ -230,6 +230,60 @@ Where `howmuch` is either a string to go through dateutil's parser for the time 
 
 Each version of this endpoint will appropriately adjust the timer.
 
+## GET /file
+
+This endpoint serves files. The purpose of this is to put files into the same CORS context as the rest of the endpoints.
+Starting with OBS 33, this might be required for your uses.
+
+Control of this is all through `config.json`. For example:
+
+```
+"file": [
+        {
+            "prefix": "examples",
+            "path": "examples"
+        },
+        {
+            "prefix": "timer.html",
+            "path": "examples/timer.html"
+        },
+        {
+            "prefix": "foo",
+            "path": "C:/Users/username/Documents/Streaming Stuff"
+        }
+    ]
+```
+
+This creates three different prefixes. Prefixes are in the URL, where paths are where files are on your hard drive.
+
+Paths can be either files or directories. If it is a directory, all files in that directory and all subdirectories are served.
+
+For example if you have:
+```
+        {
+            "prefix": "examples",
+            "path": "examples"
+        },
+```
+This is considered to be the examples directory relative to the working directory when the program is executed.
+Normally this is the directory where the executable is located.
+So a request to `http://127.0.0.1:8001/file/examples/timer.html` will serve the file `timer.html` in the `examples` directory.
+Further, the example `timer.html` references `clock.png`, which will be served as well.
+
+When serving files, the server determines the MIME type of the file based on the file extension.
+If it is not recognized, it will serve it as `application/octet-stream`.
+Currently, recognized extensions are:
+* .gif
+* .html
+* .jpeg
+* .jpg
+* .js
+* .png
+* .txt
+* .webm
+
+Other types are easy to add. Reach out by a Github issue or Discord linked below for assistance.
+
 ## GET /keypress
 
 This endpoint simulates keypresses. This uses [pynput](https://pynput.readthedocs.io/en/latest/index.html), so
