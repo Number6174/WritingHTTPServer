@@ -272,16 +272,7 @@ Further, the example `timer.html` references `clock.png`, which will be served a
 
 When serving files, the server determines the MIME type of the file based on the file extension.
 If it is not recognized, it will serve it as `application/octet-stream`.
-Currently, recognized extensions are:
-* .gif
-* .html
-* .jpeg
-* .jpg
-* .js
-* .png
-* .txt
-* .webm
-
+To determine if a type is currently supported, look at the source code in `server.py` and search for `MIME_TYPES`.
 Other types are easy to add. Reach out by a Github issue or Discord linked below for assistance.
 
 ## GET /keypress

@@ -536,17 +536,32 @@ class WritingHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def send_file(self, file_path):
         MIME_TYPES = {
+            ".aac": "audio/aac",
+            ".avi": "video/x-msvideo",
+            ".flv": "",
             ".gif": "image/gif",
             ".html": "text/html",
             ".jpeg": "image/jpeg",
             ".jpg": "image/jpeg",
             ".js": "text/javascript",
+            ".mid": "audio/midi",
+            ".midi": "audio/midi",
+            ".mkv": "video/matroska",
+            ".mov": "video/quicktime",
+            ".mp3": "audio/mpeg",
+            ".mp4": "video/mp4",
+            ".oga": "audio/ogg",
+            ".ogg": "audio/ogg",
+            ".ogv": "video/ogg",
             ".png": "image/png",
+            ".svg": "image/svg+xml",
             ".txt": "text/plain",
+            ".wav": "audio/wav",
+            ".weba": "audio/webm",
             ".webm": "video/webm"
         }
-        if file_path.suffix in MIME_TYPES.keys():
-            content_type = MIME_TYPES[file_path.suffix]
+        if file_path.suffix.lower() in MIME_TYPES.keys():
+            content_type = MIME_TYPES[file_path.suffix.lower()]
         else:
             content_type = "application/octet-stream"
 
